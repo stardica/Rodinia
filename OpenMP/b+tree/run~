@@ -1,0 +1,3 @@
+./b+tree.out core 1 file ../../data/b+tree/mil.txt command ../../data/b+tree/command.txt
+./b+tree.out core 2 file ../../data/b+tree/mil.txt command ../../data/b+tree/command.txt
+./b+tree.out core 4 file ../../data/b+tree/mil.txt command ../../data/b+tree/command.txt

@@ -1,0 +1,3 @@
+#./bfs 1 ../../data/bfs/graph128.txt
+#./bfs 2 ../../data/bfs/graph128.txt
+#./bfs 4 ../../data/bfs/graph128.txt

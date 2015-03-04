@@ -1,0 +1,101 @@
+ShaderType = IL_SHADER_COMPUTE
+TargetChip = t
+; ------------- SC_SRCSHADER Dump ------------------
+SC_SHADERSTATE: u32NumIntVSConst = 0
+SC_SHADERSTATE: u32NumIntPSConst = 0
+SC_SHADERSTATE: u32NumIntGSConst = 0
+SC_SHADERSTATE: u32NumBoolVSConst = 0
+SC_SHADERSTATE: u32NumBoolPSConst = 0
+SC_SHADERSTATE: u32NumBoolGSConst = 0
+SC_SHADERSTATE: u32NumFloatVSConst = 0
+SC_SHADERSTATE: u32NumFloatPSConst = 0
+SC_SHADERSTATE: u32NumFloatGSConst = 0
+u32SCOptions[0] = 0x00680000 SCOption_IGNORE_SAMPLE_L_BUG SCOption_FLOAT_DO_NOT_DIST SCOption_FLOAT_DO_NOT_REASSOC
+u32SCOptions[1] = 0x40000000 SCOption_R800_UAV_NONARRAY_FIXUP
+u32SCOptions[2] = 0x08200000 SCOption_R1000_BYTE_SHORT_WRITE_WORKAROUND_BUG317611 SCOption_R1000_READLANE_SMRD_WORKAROUND_BUG343479
+u32SCOptions[3] = 0x01000204 SCOption_R1000_BARRIER_WORKAROUND_BUG405404 SCOption_R1000R1100_VCCZ_CLOBBER_WORKAROUND_BUG457939 SCOption_SELECTIVE_INLINE
+; -------- Disassembly --------------------
+shader main
+  asic(SI)
+  type(CS)
+
+  s_buffer_load_dword  s0, s[8:11], 0x1c                    // 00000000: C200091C
+  s_buffer_load_dwordx2  s[2:3], s[12:15], 0x00             // 00000004: C2410D00
+  s_buffer_load_dword  s1, s[12:15], 0x04                   // 00000008: C2008D04
+  s_waitcnt     lgkmcnt(0)                                  // 0000000C: BF8C007F
+  s_add_i32     s0, s16, s0                                 // 00000010: 81000010
+  s_lshl_b32    s0, s0, 6                                   // 00000014: 8F008600
+  v_add_i32     v1, vcc, s0, v0                             // 00000018: 4A020000
+  v_ashrrev_i32  v2, 31, v1                                 // 0000001C: 3004029F
+  v_cmp_gt_i64  vcc, s[2:3], v[1:2]                         // 00000020: 7D480202
+  s_and_saveexec_b64  s[2:3], vcc                           // 00000024: BE82246A
+  v_lshlrev_b32  v0, 2, v1                                  // 00000028: 34000282
+  s_cbranch_execz  label_0047                               // 0000002C: BF88003B
+  v_add_i32     v0, vcc, s1, v0                             // 00000030: 4A000001
+  v_mov_b32     v1, 0xb5ddea0e                              // 00000034: 7E0202FF B5DDEA0E
+  s_mov_b32     s0, 0x3331bb4c                              // 0000003C: BE8003FF 3331BB4C
+  s_mov_b32     s1, 0xc2aeac4f                              // 00000044: BE8103FF C2AEAC4F
+  s_mov_b32     s2, 0x42b17218                              // 0000004C: BE8203FF 42B17218
+  v_mov_b32     v2, 0x7f800000                              // 00000054: 7E0402FF 7F800000
+  tbuffer_load_format_x  v3, v0, s[4:7], 0 offen format:[BUF_DATA_FORMAT_32,BUF_NUM_FORMAT_FLOAT] // 0000005C: EBA01000 80010300
+  s_waitcnt     vmcnt(0)                                    // 00000064: BF8C0F70
+  v_mul_f32     v4, 0x3b808081, v3                          // 00000068: 100806FF 3B808081
+  v_cmp_gt_f32  vcc, 0, v4                                  // 00000070: 7C080880
+  v_cndmask_b32  v5, 0.5, -0.5, vcc                         // 00000074: D2000005 01A9E2F0
+  v_madmk_f32   v5, v4, 0x3fb8aa3b, v5                      // 0000007C: 400A0B04 3FB8AA3B
+  v_cvt_i32_f32  v5, v5                                     // 00000084: 7E0A1105
+  v_cvt_f32_i32  v6, v5                                     // 00000088: 7E0C0B05
+  v_mul_f32     v7, 0xbf317180, v6                          // 0000008C: 100E0CFF BF317180
+  v_madmk_f32   v3, v3, 0x3b808081, v7                      // 00000094: 40060F03 3B808081
+  v_madmk_f32   v7, v6, 0xb717f7d1, v3                      // 0000009C: 400E0706 B717F7D1
+  v_mul_f32     v8, v7, v7                                  // 000000A4: 10100F07
+  v_mac_f32     v1, s0, v8                                  // 000000A8: 3E021000
+  v_madak_f32   v1, v8, v1, 0x388ab355                      // 000000AC: 42020308 388AB355
+  v_madak_f32   v1, v8, v1, 0xbb360b61                      // 000000B4: 42020308 BB360B61
+  v_madak_f32   v1, v8, v1, 0x3e2aaaab                      // 000000BC: 42020308 3E2AAAAB
+  v_mad_f32     v1, -v8, v1, v7                             // 000000C4: D2820001 241E0308
+  v_sub_f32     v8, 2.0, v1                                 // 000000CC: 081002F4
+  v_mul_f32     v1, v7, v1                                  // 000000D0: 10020307
+  v_rcp_f32     v7, v8                                      // 000000D4: 7E0E5508
+  v_mul_f32     v6, 0x3717f7d1, v6                          // 000000D8: 100C0CFF 3717F7D1
+  v_mad_f32     v6, -v1, v7, v6                             // 000000E0: D2820006 241A0F01
+  v_subrev_f32  v1, v3, v6                                  // 000000E8: 0A020D03
+  v_sub_f32     v1, 1.0, v1                                 // 000000EC: 080202F2
+  v_lshlrev_b32  v3, 23, v5                                 // 000000F0: 34060A97
+  v_add_i32     v1, vcc, v1, v3                             // 000000F4: 4A020701
+  v_cmp_ngt_f32  vcc, s1, v4                                // 000000F8: 7C160801
+  v_cndmask_b32  v1, 0, v1, vcc                             // 000000FC: 00020280
+  v_cmp_gt_f32  vcc, s2, v4                                 // 00000100: 7C080802
+  v_cndmask_b32  v1, v2, v1, vcc                            // 00000104: 00020302
+  v_cmp_class_f32  vcc, v4, 3                               // 00000108: D110006A 00010704
+  v_cndmask_b32  v1, v1, v4, vcc                            // 00000110: 00020901
+  tbuffer_store_format_x  v1, v0, s[4:7], 0 offen format:[BUF_DATA_FORMAT_32,BUF_NUM_FORMAT_FLOAT] // 00000114: EBA41000 80010100
+label_0047:
+  s_endpgm                                                  // 0000011C: BF810000
+end
+
+; ----------------- CS Data ------------------------
+
+codeLenInByte        = 288 bytes;
+
+userElementCount     = 3;
+;  userElements[0]      = IMM_UAV 12, s[4:7]
+;  userElements[1]      = IMM_CONST_BUFFER 0, s[8:11]
+;  userElements[2]      = IMM_CONST_BUFFER 1, s[12:15]
+extUserElementCount  = 0;
+NumVgprs             = 9;
+NumSgprs             = 18;
+FloatMode            = 192;
+IeeeMode             = 0;
+FlatPtr32            = 0;
+ScratchSize          = 0 dwords/thread;
+LDSByteSize          = 0 bytes/workgroup (compile time only);
+ScratchWaveOffsetReg = s0;
+; texSamplerUsage         = 0x00000000
+; constBufUsage           = 0x00000000
+
+;COMPUTE_PGM_RSRC2       = 0x000000A0
+COMPUTE_PGM_RSRC2:USER_SGPR      = 16
+COMPUTE_PGM_RSRC2:TGID_X_EN      = 1
+NumThreadX                       = 256
+

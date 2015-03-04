@@ -1,0 +1,4 @@
+#./OpenMP/leukocyte 1 1 ../../data/leukocyte/testfile.avi
+./OpenMP/leukocyte 1 1 ../../data/leukocyte/testfile.avi
+#./OpenMP/leukocyte 1 2 ../../data/leukocyte/testfile.avi
+#./OpenMP/leukocyte 1 4 ../../data/leukocyte/testfile.avi

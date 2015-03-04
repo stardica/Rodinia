@@ -1,0 +1,10 @@
+#!/bin/bash
+
+source ./scripts/paths.sh
+
+echo " "
+echo "---Running K Means OpenMP on simulator---"
+for i in 1 2 4
+do
+$m2s_cgm_path/m2s-cgm --x86-sim detailed --x86-config $config_file_path/$cpu_config_file_name /home/stardica/Dropbox/WorkingRodiniaBenchmarks/OpenMP/kmeans/kmeans_openmp/kmeans -n $i -i /home/stardica/Dropbox/WorkingRodiniaBenchmarks/data/kmeans/100
+done

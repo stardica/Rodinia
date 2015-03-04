@@ -1,0 +1,3 @@
+./particle_filter -x 128 -y 128 -z 10 -np 1
+./particle_filter -x 128 -y 128 -z 10 -np 2
+./particle_filter -x 128 -y 128 -z 10 -np 4

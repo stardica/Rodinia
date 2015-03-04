@@ -1,0 +1,1 @@
+./nn /home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/data/nn/inputGen/list1k.txt -r 5 -lat 30 -lng 90 -p 0 -d 0
