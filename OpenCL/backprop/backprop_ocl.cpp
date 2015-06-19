@@ -12,7 +12,7 @@
 	#include <CL/cl.h>
 #endif
 
-char kernel_binary[100] = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/backprop/backprop_kernel.cl.bin.GPU";
+#include "paths.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 
