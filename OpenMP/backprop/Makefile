@@ -2,6 +2,7 @@
 CC = gcc
 CC_FLAGS = -g -fopenmp  -O2
 
+all: backprop
 
 backprop: backprop.o facetrain.o imagenet.o backprop_kernel.o 
 	$(CC) $(CC_FLAGS) backprop.o facetrain.o imagenet.o backprop_kernel.o -o backprop -lm
