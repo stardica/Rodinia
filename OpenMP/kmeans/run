@@ -1,3 +1,3 @@
-./kmeans_openmp/kmeans -n 1 -i ../../data/kmeans/kdd_cup
-./kmeans_openmp/kmeans -n 2 -i ../../data/kmeans/kdd_cup 
-./kmeans_openmp/kmeans -n 4 -i ../../data/kmeans/kdd_cup  
+./kmeans_openmp/kmeans -n 1 -i ../../data/kmeans/100
+./kmeans_openmp/kmeans -n 2 -i ../../data/kmeans/100 
+./kmeans_openmp/kmeans -n 4 -i ../../data/kmeans/100  

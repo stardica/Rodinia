@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include "kmeans.h"
+#include "paths.h"
 
 #ifdef WIN
 	#include <windows.h>
@@ -49,7 +50,7 @@
      #define BLOCK_SIZE2 256
 #endif
 
-char kernel_binary[100] = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/kmeans/kmeans_kernels.cl.bin.GPU";
+
 
 // local variables
 static cl_context	    context;

@@ -16,10 +16,11 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 CC = g++
 CC_FLAGS = -g -O2 
 
-#uncomment for different libraries.
+all: kmeans
+
 kmeans: cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o
-	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lm2s-opencl kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB)
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lOpenCL kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB)
+	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lm2s-opencl kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB)
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c

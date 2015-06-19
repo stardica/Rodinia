@@ -21,6 +21,8 @@ FLAGS = -O3
 SRC = streamcluster.cpp
 EXE = streamcluster
 
+all: release
+
 release:$(SRC)
 	#$(CC) -lOpenCL  $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB)	$(FLAGS)
 	$(CC) -lm2s-opencl  $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) $(FLAGS)

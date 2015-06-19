@@ -16,6 +16,8 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 CC = g++
 CC_FLAGS = -g -O2 
 
+all: backprop
+
 backprop: backprop.o imagenet.o facetrain.o
 	#$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lOpenCL
 	$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl
