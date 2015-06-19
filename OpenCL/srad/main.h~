@@ -1,2 +1,2 @@
 #define fp float
-#define NUMBER_THREADS 256
+#define NUMBER_THREADS 64
