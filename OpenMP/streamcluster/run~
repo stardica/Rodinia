@@ -1,3 +1,0 @@
-./sc_omp 10 20 8 16 16 20 none output_p1 1
-./sc_omp 10 20 8 16 16 20 none output_p2 2
-./sc_omp 10 20 8 16 16 20 none output_p4 4

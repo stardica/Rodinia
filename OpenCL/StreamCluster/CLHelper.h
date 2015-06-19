@@ -33,7 +33,7 @@ double D2D; //: the time to transfer data from device to device;
 double KE;	//: the kernel execution time
 double KC;  //: the kernel compilation time
 #endif
-char kernel_binary[250] = "/home/stardica/Dropbox/WorkingRodiniaBenchmarks/OpenCL/StreamCluster/streamcluster_kernels.cl.bin.GPU";
+#include "paths.h"
 //#pragma OPENCL EXTENSION cl_nv_compiler_options:enable
 #define WORK_DIM 2	//work-items dimensions
 /*------------------------------------------------------------

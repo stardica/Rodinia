@@ -16,7 +16,6 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 #C compiler
 CC = g++
 
-
 FLAGS = -O3
 SRC = streamcluster.cpp
 EXE = streamcluster
