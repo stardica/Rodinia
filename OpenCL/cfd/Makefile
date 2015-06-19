@@ -25,6 +25,8 @@ SRC = euler3d.cpp
 
 EXE = euler3d
 
+all: release
+
 release:$(SRC)
 	#$(CC) $(KERNEL_DIM) $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lOpenCL $(FLAGS)
 	$(CC) $(KERNEL_DIM) $(SRC) -o $(EXE) -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl $(FLAGS)  

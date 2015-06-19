@@ -1,3 +1,6 @@
 #!/bin/bash
-./scripts/run_cfd_MP.sh
-./scripts/run_cfd_CL.sh
+
+source /home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/Scripts/paths.sh
+
+$scripts_path/run_cfd_MP.sh
+$scripts_path/run_cfd_CL.sh
