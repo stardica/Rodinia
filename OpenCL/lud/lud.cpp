@@ -62,7 +62,7 @@ static int shutdown(void);
 double gettime(void);
 cl_program CreateProgramFromBinary(cl_context context, cl_device_id device, const char* fileName);
 
-char KERNEL[] = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/lud/ocl/lud_kernel.cl.bin.GPU";
+#include "paths.h"
 
 
 int main (int argc, char *argv[]){

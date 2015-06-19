@@ -19,6 +19,8 @@ CC_FLAGS = -g -O3 -Wall
 
 EXE = lud
 
+all: lud
+
 $(EXE): lud.cpp
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) lud.cpp common.c $(INC) $(LIB) -lOpenCL
 	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) lud.cpp common.c $(INC) $(LIB) -lm2s-opencl

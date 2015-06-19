@@ -20,7 +20,7 @@ CXX             := g++
 
 # ------------  compiler flags  ------------------------------------------------
 DEBUG_CFLAGS    := -Wall -O0 -g
-RELEASE_CFLAGS  := -Wall -O2 
+RELEASE_CFLAGS  := -Wall -O2
 COMMON_CFLAGS   := -fopenmp
 
 # ------------  compiler defs  ------------------------------------------------
