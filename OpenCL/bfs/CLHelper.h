@@ -34,8 +34,8 @@ struct oclHandleStruct
 
 struct oclHandleStruct oclHandles;
 
-char kernel_file[100]  = "/home/stardica/Desktop/m2sRodiniaBenchmarks/Rodinia/OpenCL/BFS/src/Kernels.cl";
-char kernel_binary[100] = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/bfs/bfs_kernels.cl.bin.GPU";
+#include "paths.h"
+
 int total_kernels = 2;
 string kernel_names[2] = {"BFS_1", "BFS_2"};
 int work_group_size = 512;

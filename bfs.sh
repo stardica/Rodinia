@@ -1,3 +1,6 @@
 #!/bin/bash
-#./scripts/run_bfs_MP.sh
-./scripts/run_bfs_CL.sh
+
+source /home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/Scripts/paths.sh
+
+$scripts_path/run_bfs_MP.sh
+$scripts_path/run_bfs_CL.sh
