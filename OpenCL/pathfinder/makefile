@@ -21,6 +21,8 @@ DEBUGFLAGS = -g
 CXXFLAGS = -I$(OPENCL_INC) -c $(DEBUGFLAGS)
 LINKFLAGS = -L$(OPENCL_LIB) 
 
+all: a.out
+
 # link objects(binaries) together
 a.out: main.o OpenCL.o
 	$(CXX) main.o OpenCL.o $(LINKFLAGS) -o pathfinder
@@ -30,5 +32,6 @@ main.o: main.cpp OpenCL.cpp kernels.cl
 	$(CXX) $(CXXFLAGS) main.cpp OpenCL.cpp
 
 clean:
-	clear
 	@rm -f pathfinder *.o *.out *~ *\#
+
+	#clear

@@ -3,6 +3,8 @@ SRC = pathfinder.cpp
 EXE = pathfinder
 FLAGS = -fopenmp
 
+all: release
+
 release:
 	$(CC) $(SRC) $(FLAGS) -o $(EXE)
 
@@ -11,5 +13,3 @@ debug:
 
 clean:
 	rm -f pathfinder
-
-
