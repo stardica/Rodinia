@@ -25,7 +25,7 @@
 
 //global variables
 
-char kernel_binary[100] = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/nw/nw_new.cl.bin.GPU";
+#include "paths.h"
 
 int blosum62[24][24] = {
 { 4, -1, -2, -2,  0, -1, -1,  0, -2, -1, -1, -1, -1, -2, -1,  1,  0, -3, -2,  0, -2, -1,  0, -4},
