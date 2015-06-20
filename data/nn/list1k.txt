@@ -1,1 +1,1 @@
-/home/stardica/Dropbox/WorkingRodiniaBenchmarks/data/nn/cane1k.db
+/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/nn/cane1k.db

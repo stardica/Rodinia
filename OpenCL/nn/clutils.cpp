@@ -58,6 +58,7 @@
 
 #include "clutils.h"
 #include "utils.h"
+#include "paths.h"
 
 
 // The following variables have file scope to simplify
@@ -835,7 +836,6 @@ cl_program cl_compileProgram(char* kernelPath, char* compileoptions, bool verbos
 	//get binanry file
 
 	FILE * fp;
-	char * kernel_binary = "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/nn/nearestNeighbor_kernel.cl.bin.GPU";
 	fp = fopen(kernel_binary, "rb");
 	if (fp == NULL)
 	{
