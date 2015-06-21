@@ -1,7 +1,11 @@
 
-ifdef OUTPUT
-override OUTPUT = -DOUTPUT
-endif
+#ifdef OUTPUT
+#override OUTPUT = -DOUTPUT
+#endif
+
+OUTPUT = -DOUTPUT
+
+all: heartwall
 
 # link objects(binaries) together
 heartwall: main.o ./AVI/avilib.o ./AVI/avimod.o
