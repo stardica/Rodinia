@@ -14,6 +14,9 @@ C_C = gcc
 OMP_LIB = -lgomp
 OMP_FLAG = -fopenmp
 
+
+all: a.out
+
 # link objects (binaries) together
 a.out:		main.o \
 			./kernel/kernel_cpu.o \
