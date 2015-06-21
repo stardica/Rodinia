@@ -6,7 +6,8 @@
 //#include "../util/opencl/opencl.h"
 #include "./kernel_gpu_opencl_wrapper.h"
 
-char kernel_binary[250]= "/home/stardica/Desktop/Benchmarks/Rodinia/rodinia_3.0/opencl/srad/kernel/kernel_gpu_opencl.cl.bin.GPU";
+#include "kernel_paths.h"
+
 
 kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, jW, iter, mem_size_i, mem_size_j){
 

@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "main.h"	
-#include "paths.h"								
 #include "./util/graphics/graphics.h"				
 #include "./util/graphics/resize.h"					
 #include "./util/timer/timer.h"						
 #include "./kernel/kernel_gpu_opencl_wrapper.h"
+#include "paths.h"
 
 int main(int argc, char* argv []){
 

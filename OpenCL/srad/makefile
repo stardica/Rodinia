@@ -19,6 +19,8 @@ C_C = gcc
 OCL_LIB = -lm2s-opencl
 #OCL_LIB = -lOpenCL
 
+all: ./a.out
+
 ./a.out:	./main.o \
 		./kernel/kernel_gpu_opencl_wrapper.o \
 		./util/opencl/opencl.o \
