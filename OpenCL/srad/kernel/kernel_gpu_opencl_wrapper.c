@@ -89,8 +89,8 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 		printf("error opening kernel binary\n");
 	}
 
-	printf("read binary\n");
-	fflush(stdout);
+	/*printf("read binary\n");
+	fflush(stdout);*/
 
 	// Determine the size of the binary
 	size_t binarySize;
@@ -110,8 +110,8 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	cl_program program = clCreateProgramWithBinary(context, 1, &device, &binarySize, (const unsigned char**)&programBinary, &binaryStatus, &err);
 	if ((err != CL_SUCCESS) || (binaryStatus != CL_SUCCESS)) { printf("error in clCreateProgramWithBinary1\n");}
 
-	printf("clCreateProgramWithBinary\n");
-	fflush(stdout);
+	/*printf("clCreateProgramWithBinary\n");
+	fflush(stdout);*/
 
 	// Compile the program
 	error = clBuildProgram(program, 1, &device, NULL, NULL, NULL);
