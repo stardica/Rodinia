@@ -81,7 +81,7 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	cl_program program = clCreateProgramWithSource(context, 1, &source, &sourceSize, &error);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}*/
 
-	//CDA6908 changes star here
+	//changes star here
 	//get binanry file
 	FILE *filePointer = fopen(kernel_binary, "rb");
 	if (filePointer == NULL)
