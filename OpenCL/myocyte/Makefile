@@ -11,39 +11,45 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
-
-
 C_C = gcc
 #OCL_LIB = -lOpenCL
 OCL_LIB = -lm2s-opencl
 
-all: b+tree
+all: myocyte
 
-b+tree:	./main.o \
-		./kernel/kernel_gpu_opencl_wrapper.o \
-		./kernel/kernel_gpu_opencl_wrapper_2.o \
-		./util/timer/timer.o \
-		./util/num/num.o \
-		./util/opencl/opencl.o
+./myocyte:	./main.o \
+			./kernel/kernel_gpu_opencl_wrapper.o \
+			./util/file/file.o \
+			./util/num/num.o \
+			./util/timer/timer.o \
+			./util/opencl/opencl.o
 	$(C_C)	./main.o \
 			./kernel/kernel_gpu_opencl_wrapper.o \
-			./kernel/kernel_gpu_opencl_wrapper_2.o \
-			./util/timer/timer.o \
+			./util/file/file.o \
 			./util/num/num.o \
+			./util/timer/timer.o \
 			./util/opencl/opencl.o \
+			-I$(OPENCL_INC) \
 			-lm \
 			-L$(OPENCL_LIB) \
-			$(OCL_LIB) \
-	        -o b+tree
+                        $(OCL_LIB) \
+                        -o myocyte
+# ========================================================================================================================================================================================================200
+#	OBJECTS (COMPILE SOURCE FILES INTO OBJECTS)
+# ========================================================================================================================================================================================================200
 
+# ======================================================================================================================================================150
+#	MAIN FUNCTION
+# ======================================================================================================================================================150
 
-main.o:	./common.h \
-		./main.h \
-		./main.c
-	$(C_C)	$(KERNEL_DIM) ./main.c \
+./main.o:	./common.h \
+			./main.h \
+			./main.c
+	$(C_C)	./main.c \
 			-c \
 			-o ./main.o \
-			-O3
+			-O3 \
+			-g
 
 # ======================================================================================================================================================150
 #	KERNELS
@@ -51,32 +57,27 @@ main.o:	./common.h \
 
 ./kernel/kernel_gpu_opencl_wrapper.o:	./common.h \
 										./kernel/kernel_gpu_opencl_wrapper.h \
-										./kernel/kernel_gpu_opencl_wrapper.c
-	$(C_C)	$(KERNEL_DIM) ./kernel/kernel_gpu_opencl_wrapper.c \
+										./kernel/kernel_gpu_opencl_wrapper.c \
+										./kernel/solver.c \
+										./kernel/embedded_fehlberg_7_8.c \
+										./kernel/master.c \
+										./kernel/kernel_gpu_opencl.cl
+	$(C_C)	./kernel/kernel_gpu_opencl_wrapper.c \
 			-c \
 			-o ./kernel/kernel_gpu_opencl_wrapper.o \
-			-O3 \
-			-I$(OPENCL_INC)
-
-./kernel/kernel_gpu_opencl_wrapper_2.o:	./common.h \
-										./kernel/kernel_gpu_opencl_wrapper_2.h \
-										./kernel/kernel_gpu_opencl_wrapper_2.c
-	$(C_C)	$(KERNEL_DIM) ./kernel/kernel_gpu_opencl_wrapper_2.c \
-			-c \
-			-o ./kernel/kernel_gpu_opencl_wrapper_2.o \
-			-O3 \
-			-I$(OPENCL_INC)
+			-I$(OPENCL_INC) \
+			-O3
 
 # ======================================================================================================================================================150
 #	UTILITIES
 # ======================================================================================================================================================150
 
-./util/timer/timer.o:	./common.h \
-						./util/timer/timer.h \
-						./util/timer/timer.c
-	$(C_C)	./util/timer/timer.c \
+./util/file/file.o:	./common.h \
+					./util/file/file.h \
+					./util/file/file.c
+	$(C_C)	./util/file/file.c \
 			-c \
-			-o ./util/timer/timer.o \
+			-o ./util/file/file.o \
 			-O3
 
 ./util/num/num.o:	./common.h \
@@ -87,14 +88,22 @@ main.o:	./common.h \
 			-o ./util/num/num.o \
 			-O3
 
+./util/timer/timer.o:	./common.h \
+						./util/timer/timer.h \
+						./util/timer/timer.c
+	$(C_C)	./util/timer/timer.c \
+			-c \
+			-o ./util/timer/timer.o \
+			-O3
+
 ./util/opencl/opencl.o:	./common.h \
 						./util/opencl/opencl.h \
 						./util/opencl/opencl.c
-	$(C_C)	./util/opencl/opencl.c \
+	$(C_C)	-I$(OPENCL_INC) \
+		./util/opencl/opencl.c \
 			-c \
 			-o ./util/opencl/opencl.o \
-			-O3 \
-			-I$(OPENCL_INC)
+			-O3
 
 # ======================================================================================================================================================150
 #	END
@@ -105,12 +114,10 @@ main.o:	./common.h \
 # ========================================================================================================================================================================================================200
 
 clean:
-	rm	*.o b+tree\
+	rm	*.o myocyte \
 		./kernel/*.o \
+		./util/file/*.o \
 		./util/timer/*.o \
-		./util/num/*.o \
 		./util/opencl/*.o \
-                output.txt
-# ========================================================================================================================================================================================================200
-#	END
-# ========================================================================================================================================================================================================200
+                ./util/num/*.o \
+                ./output.txt
