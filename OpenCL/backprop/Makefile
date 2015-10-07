@@ -20,19 +20,19 @@ all: backprop
 
 backprop: backprop.o imagenet.o facetrain.o
 	#$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lOpenCL
-	$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl
+	$(CC) $(CC_FLAGS) backprop_ocl.cpp backprop.o imagenet.o facetrain.o -o backprop -I$(OPENCL_INC) -L$(OPENCL_LIB) -lm2s-opencl -static -pthread -ldl -lrt
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c
 	
 backprop.o: backprop.c 
-	$(CC) $(CC_FLAGS) backprop.c -c
+	$(CC) $(CC_FLAGS) backprop.c -c -static
 	
 facetrain.o: facetrain.c
-	$(CC) $(CC_FLAGS) facetrain.c -c
+	$(CC) $(CC_FLAGS) facetrain.c -c -static
 
 imagenet.o: imagenet.c
-	$(CC) $(CC_FLAGS) imagenet.c -c
+	$(CC) $(CC_FLAGS) imagenet.c -c -static
 
 clean:
 	rm -f *.o *~ backprop *.linkinfo
