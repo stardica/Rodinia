@@ -24,7 +24,7 @@ CC_FLAGS = -m32 -g -O2 -Wall -I$(MATRIX_DIR) -I$(OPENCL_INC)
 
 leukocyte: detect_main.o avilib.o find_ellipse.o find_ellipse_opencl.o track_ellipse.o track_ellipse_opencl.o misc_math.o OpenCL_helper_library.o $(MATRIX_DIR)/meschach.a
 	#$(CC) $(CC_FLAGS) -lm avilib.o find_ellipse.o find_ellipse_opencl.o track_ellipse.o track_ellipse_opencl.o misc_math.o OpenCL_helper_library.o detect_main.o -o leukocyte $(MATRIX_DIR)/meschach.a -L$(OPENCL_LIB) -lm -lOpenCL
-	$(CC) $(CC_FLAGS) -lm avilib.o find_ellipse.o find_ellipse_opencl.o track_ellipse.o track_ellipse_opencl.o misc_math.o OpenCL_helper_library.o detect_main.o -o leukocyte $(MATRIX_DIR)/meschach.a -L$(OPENCL_LIB) -lm -lm2s-opencl
+	$(CC) $(CC_FLAGS) -lm avilib.o find_ellipse.o find_ellipse_opencl.o track_ellipse.o track_ellipse_opencl.o misc_math.o OpenCL_helper_library.o detect_main.o -o leukocyte $(MATRIX_DIR)/meschach.a -L$(OPENCL_LIB) -lm -lm2s-opencl -static -lpthread -ldl -lrt
 
 %.o: %.[ch]
 	$(CC) $(OUTPUT) $(CC_FLAGS) $< -c

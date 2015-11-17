@@ -10,7 +10,7 @@
 // Function prototypes
 char *load_kernel_source(const char *filename);
 long long get_time();
-void fatal(const char *s);
+void fatal_hotspot(const char *s);
 void fatal_CL(cl_int error, int line_no);
 
 

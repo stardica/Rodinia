@@ -13,10 +13,10 @@ endif
 all: omp
 
 cpu:
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) streamcluster_original.cpp -o $(TARGET_C) $(LIBS) -DENABLE_THREADS -pthread
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) streamcluster_original.cpp -o $(TARGET_C) $(LIBS) -DENABLE_THREADS -pthread -static
 
 omp:
-	g++ -O2 -fopenmp -o $(TARGET_O) streamcluster_omp.cpp
+	g++ -O2 -fopenmp -o $(TARGET_O) streamcluster_omp.cpp -static
 
 clean:
-	rm -f *.o *~ *.txt sc_cpu sc_omp
+	rm -f *.o *~ *.txt sc_cpu sc_omp 

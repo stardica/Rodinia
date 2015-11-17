@@ -19,7 +19,7 @@ all: hotspot
 
 $(EXE): hotspot.c hotspot.h OpenCL_helper_library.c OpenCL_helper_library.h
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) -I$(OPENCL_INC) OpenCL_helper_library.c hotspot.c -L$(OPENCL_LIB) -lOpenCL
-	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) -I$(OPENCL_INC) OpenCL_helper_library.c hotspot.c -L$(OPENCL_LIB) -lm2s-opencl
+	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) -I$(OPENCL_INC) OpenCL_helper_library.c hotspot.c -L$(OPENCL_LIB) -lm2s-opencl -static -lpthread -ldl -lrt
 
 clean:
 	rm -f $(EXE)

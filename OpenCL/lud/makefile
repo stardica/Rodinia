@@ -23,7 +23,7 @@ all: lud
 
 $(EXE): lud.cpp
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) lud.cpp common.c $(INC) $(LIB) -lOpenCL
-	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) lud.cpp common.c $(INC) $(LIB) -lm2s-opencl
+	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) lud.cpp common.c $(INC) $(LIB) -lm2s-opencl -static -lpthread -ldl -lrt 
 
 clean:
 	rm -f $(EXE)

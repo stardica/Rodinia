@@ -34,7 +34,7 @@ char *load_kernel_source(const char *filename) {
 	return (tv.tv_sec * 1000000) + tv.tv_usec;
 }*/
 
-void fatal(const char *s) {
+void fatal_leuk(const char *s) {
 	fprintf(stderr, "Error: %s\n", s);
 	exit(1);
 }

@@ -25,11 +25,11 @@ all: a.out
 
 # link objects(binaries) together
 a.out: main.o OpenCL.o
-	$(CXX) main.o OpenCL.o $(LINKFLAGS) -o pathfinder
+	$(CXX) main.o OpenCL.o $(LINKFLAGS) -o pathfinder -static -lpthread -ldl -lrt
 
 # compile main function file into object (binary)
 main.o: main.cpp OpenCL.cpp kernels.cl
-	$(CXX) $(CXXFLAGS) main.cpp OpenCL.cpp
+	$(CXX) $(CXXFLAGS) main.cpp OpenCL.cpp -static -lpthread -ldl -lrt
 
 clean:
 	@rm -f pathfinder *.o *.out *~ *\#

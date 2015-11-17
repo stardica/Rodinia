@@ -1095,7 +1095,7 @@ void outcenterIDs( Points* centers, long* centerIDs, char* outfile ) {
 
   for( int i = 0; i < centers->num; i++ ) {
     if( is_a_median[i] ) {
-      fprintf(fp, "%u\n", centerIDs[i]);
+      fprintf(fp, "%lu\n", centerIDs[i]);
       fprintf(fp, "%lf\n", centers->p[i].weight);
       for( int k = 0; k < centers->dim; k++ ) {
 	fprintf(fp, "%lf ", centers->p[i].coord[k]);

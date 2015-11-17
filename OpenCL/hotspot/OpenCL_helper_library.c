@@ -1,5 +1,7 @@
 #include "OpenCL_helper_library.h"
 
+
+
 // Loads the kernel source code from the specified file into a C string and returns the string pointer
 /*char *load_kernel_source(const char *filename) {
 	// Open the source file
@@ -34,7 +36,7 @@ long long get_time() {
 	return (tv.tv_sec * 1000000) + tv.tv_usec;
 }
 
-void fatal(const char *s) {
+void fatal_hotspot(const char *s) {
 	fprintf(stderr, "Error: %s\n", s);
 	exit(1);
 }
