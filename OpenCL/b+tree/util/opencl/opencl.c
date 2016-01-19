@@ -49,9 +49,7 @@ load_kernel_source(const char *filename)
 //	PRINT ERROR FUNCTION
 //===============================================================================================================================================================================================================200
 
-void 
-fatal(const char *s)
-{
+void fatal(const char *s){
 	fprintf(stderr, "Error: %s\n", s);
 	exit(1);
 }

@@ -38,7 +38,7 @@ struct oclHandleStruct oclHandles;
 
 int total_kernels = 2;
 string kernel_names[2] = {"BFS_1", "BFS_2"};
-int work_group_size = 512;
+int work_group_size = 256;
 int device_id_inused = 0; //deviced id used (default : 0)
 
 

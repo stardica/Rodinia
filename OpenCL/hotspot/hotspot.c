@@ -88,9 +88,10 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 	
 	long long start_time = get_time();	
 
-	for (t = 0; t < total_iterations; t += num_iterations) {
+	for (t = 0; t < total_iterations; t ++)
+	{
 		
-		printf("Run kernel %d of %d\n", num_iterations, total_iterations);
+		printf("Run kernel %d of %d\n", total_iterations, num_iterations);
 
 		// Specify kernel arguments
 		int iter = MIN(num_iterations, total_iterations - t);
@@ -119,13 +120,13 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 		// Swap input and output GPU matrices
 		src = 1 - src;
 		dst = 1 - dst;
+
+		// Wait for all operations to finish
+		error = clFinish(command_queue);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	}
 
-	printf("Done running kernel\n");
-	
-	// Wait for all operations to finish
-	error = clFinish(command_queue);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	printf("Done running kernels\n");
 	
 	long long end_time = get_time();
 	long long total_time = (end_time - start_time);	
@@ -300,7 +301,7 @@ int main(int argc, char** argv) {
     	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
 		
-    	printf("program and kernel created\n");
+    printf("program and kernel created\n");
 	//getchar();
 
 	long long start_time = get_time();
@@ -326,6 +327,7 @@ int main(int argc, char** argv) {
 	int ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows, total_iterations, pyramid_height,
 				    blockCols, blockRows, borderCols, borderRows, FilesavingTemp, FilesavingPower);
 	
+	printf("clEnqueueMapBuffer\n");
 	// Copy final temperature data back
 	cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
@@ -334,7 +336,7 @@ int main(int argc, char** argv) {
 	printf("Total time: %.3f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
 	
 	// Write final output to output file
-    	writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
+    writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
     
 	error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
@@ -343,7 +345,7 @@ int main(int argc, char** argv) {
 	clReleaseMemObject(MatrixTemp[1]);
 	clReleaseMemObject(MatrixPower);
 	
-        clReleaseContext(context);
+    clReleaseContext(context);
 
 	return 0;
 }
