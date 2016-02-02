@@ -14,7 +14,7 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 
 # C compiler
 CC = g++
-CC_FLAGS = -g -O2 
+CC_FLAGS = -g -O2 -m32
 
 all: backprop
 
