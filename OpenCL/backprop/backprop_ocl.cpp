@@ -5,12 +5,15 @@
 #include <math.h>
 #include <sys/time.h>
 #include "backprop.h"
+#include <CL/cl.h>
+/*
 
 #ifdef NV //NVIDIA
 	#include <oclUtils.h>
 #else 
-	#include <CL/cl.h>
+
 #endif
+*/
 
 #include "paths.h"
 
@@ -165,6 +168,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 
 	cl_kernel kernel1;
 	cl_kernel kernel2;
+	fflush(stdout);
 	kernel1 = clCreateKernel(prog, kernel_bp1, &err);
 	kernel2 = clCreateKernel(prog, kernel_bp2, &err);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
@@ -213,7 +217,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_hidden_ocl\n"); return -1;}
 
 	/*output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), NULL, &err);*/
-	//output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), &output_hidden_ocl, &err, CL_TRUE);
+	output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), &output_hidden_ocl, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_hidden_ocl\n"); return -1;}
 
 	/*hidden_partial_sum = clCreateBuffer(context, CL_MEM_READ_WRITE, num_blocks * WIDTH * sizeof(float), NULL, &err);*/
