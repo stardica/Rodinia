@@ -6,6 +6,9 @@
 
 #include "backprop.h"
 
+#define STATS_START 325
+#define STATS_STOP 326
+
 ////////////////////////////////////////////////////////////////////////////////
 
 extern void bpnn_layerforward(float *l1, float *l2, float **conn, int n1, int n2);
@@ -49,11 +52,18 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   out = net->output_n;   
    
   printf("Performing CPU computation\n");
+
+  //simulator stats collection
+  syscall(STATS_START);
+
   bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
   bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);
   bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);
   bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);  
   bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);
   bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);
+
+  //simulator stats collection
+  syscall(STATS_STOP);
 
 }
