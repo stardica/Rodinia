@@ -53,7 +53,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
    
   printf("Performing CPU computation\n");
 
-  //simulator stats collection
+  //simulator start stats collection
   syscall(STATS_START);
 
   bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
@@ -63,7 +63,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);
   bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);
 
-  //simulator stats collection
+  //simulator stop stats collection
   syscall(STATS_STOP);
 
 }
