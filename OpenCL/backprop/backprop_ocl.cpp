@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include "backprop.h"
 #include <CL/cl.h>
+#include <unistd.h>
 /*
 
 #ifdef NV //NVIDIA
@@ -17,6 +18,9 @@
 
 #include "paths.h"
 
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -122,34 +126,34 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(initialize(use_gpu)) return -1;
 	
 	//star changes star here
-		//get binanry file
-		FILE *fp = fopen(kernel_binary, "rb");
-		if (fp == NULL)
-		{
-			printf("error opening kernel binary\n");
-		}
+	//get binanry file
+	FILE *fp = fopen(kernel_binary, "rb");
+	if (fp == NULL)
+	{
+		printf("error opening kernel binary\n");
+	}
 
-		// Determine the size of the binary
-		size_t binarySize;
-		fseek(fp, 0, SEEK_END);
-		binarySize = ftell(fp);
-		rewind(fp);
+	// Determine the size of the binary
+	size_t binarySize;
+	fseek(fp, 0, SEEK_END);
+	binarySize = ftell(fp);
+	rewind(fp);
 
-		unsigned char *programBinary;
-		programBinary = (unsigned char *) malloc(sizeof(unsigned char[binarySize]));
+	unsigned char *programBinary;
+	programBinary = (unsigned char *) malloc(sizeof(unsigned char[binarySize]));
 
-		fread(programBinary, 1, binarySize, fp);
-		fclose(fp);
+	size_t ret = fread(programBinary, 1, binarySize, fp);
+	fclose(fp);
 
-		cl_int binaryStatus;
-		cl_int err = 0;
+	cl_int binaryStatus;
+	cl_int err = 0;
 
-		cl_program prog = clCreateProgramWithBinary(context, 1, &device_list[0], &binarySize, (const unsigned char**)&programBinary, &binaryStatus, &err);
+	cl_program prog = clCreateProgramWithBinary(context, 1, &device_list[0], &binarySize, (const unsigned char**)&programBinary, &binaryStatus, &err);
 
-		if ((err != CL_SUCCESS) || (binaryStatus != CL_SUCCESS))
-		{
-			printf("error in clCreateProgramWithBinary\n");
-		}
+	if ((err != CL_SUCCESS) || (binaryStatus != CL_SUCCESS))
+	{
+		printf("error in clCreateProgramWithBinary\n");
+	}
 
 	// compile kernel
 	//cl_int err = 0;
@@ -165,8 +169,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	//char * kernel_bp1  = "kernel_bp1";
 	//char * kernel_bp2  = "kernel_bp2";
 
-	char *kernel_bp1  = "bpnn_layerforward_ocl";
-	char *kernel_bp2  = "bpnn_adjust_weights_ocl";
+	char *kernel_bp1  = strdup("bpnn_layerforward_ocl");
+	char *kernel_bp2  = strdup("bpnn_adjust_weights_ocl");
 
 	cl_kernel kernel1;
 	cl_kernel kernel2;
@@ -186,11 +190,11 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	input_weights_prev_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));
 	partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));
 	
-	// set global and local workitems
+	// set global and local work items
 	size_t global_work[3] = { BLOCK_SIZE, BLOCK_SIZE * num_blocks, 1 }; 
 	size_t local_work[3] = { BLOCK_SIZE, BLOCK_SIZE, 1 };
 	
-	// this preprocessing stage is temporarily added to correct the bug of wrong memcopy using two-dimensional net->inputweights
+	// this pre-processing stage is temporarily added to correct the bug of wrong memcopy using two-dimensional net->inputweights
 	// todo: fix mem allocation
 	int m = 0;
 	for (int k = 0; k <= in; k++) {	
@@ -235,6 +239,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_prev_weights_ocl\n"); return -1;}
 		
 	printf("Performing GPU computation\n");
+	syscall(BEGIN_PARALLEL_SECTION);
 	
 	//write buffers
 	err = clEnqueueWriteBuffer(cmd_queue, input_ocl, 1, 0, (in + 1) * sizeof(float), net->input_units, 0, 0, 0);
@@ -296,7 +301,9 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }	
 
 	err = clEnqueueReadBuffer(cmd_queue, input_hidden_ocl, 1, 0, (in + 1) * (hid + 1) * sizeof(float), input_weights_one_dim, 0, 0, 0);
-	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }	
+	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
+
+	syscall(END_PARALLEL_SECTION);
   
 	clReleaseMemObject(input_ocl);
 	clReleaseMemObject(output_hidden_ocl);

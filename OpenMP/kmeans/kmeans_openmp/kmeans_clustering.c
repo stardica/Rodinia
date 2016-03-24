@@ -68,6 +68,9 @@
 
 #define RANDOM_MAX 2147483647
 
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+
 #ifndef FLT_MAX
 #define FLT_MAX 3.40282347e+38
 #endif
@@ -136,7 +139,7 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
     nthreads = num_omp_threads; 
 
     /* allocate space for returning variable clusters[] */
-    clusters    = (float**) malloc(nclusters *             sizeof(float*));
+    clusters    = (float**) malloc(nclusters * sizeof(float*));
     clusters[0] = (float*)  malloc(nclusters * nfeatures * sizeof(float));
     for (i=1; i<nclusters; i++)
         clusters[i] = clusters[i-1] + nfeatures;
@@ -154,20 +157,22 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
 
     /* need to initialize new_centers_len and new_centers[0] to all 0 */
     new_centers_len = (int*) calloc(nclusters, sizeof(int));
-
-    new_centers    = (float**) malloc(nclusters *            sizeof(float*));
+    new_centers    = (float**) malloc(nclusters * sizeof(float*));
     new_centers[0] = (float*)  calloc(nclusters * nfeatures, sizeof(float));
+
     for (i=1; i<nclusters; i++)
         new_centers[i] = new_centers[i-1] + nfeatures;
 
 
     partial_new_centers_len    = (int**) malloc(nthreads * sizeof(int*));
     partial_new_centers_len[0] = (int*)  calloc(nthreads*nclusters, sizeof(int));
+
     for (i=1; i<nthreads; i++)
 		partial_new_centers_len[i] = partial_new_centers_len[i-1]+nclusters;
 
 	partial_new_centers    =(float***)malloc(nthreads * sizeof(float**));
     partial_new_centers[0] =(float**) malloc(nthreads*nclusters * sizeof(float*));
+
     for (i=1; i<nthreads; i++)
         partial_new_centers[i] = partial_new_centers[i-1] + nclusters;
 
@@ -176,8 +181,12 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
         for (j=0; j<nclusters; j++)
             partial_new_centers[i][j] = (float*)calloc(nfeatures, sizeof(float));
 	}
+
 	printf("num of threads = %d\n", num_omp_threads);
-    do {
+
+	syscall(BEGIN_PARALLEL_SECTION);
+
+	do {
         delta = 0.0;
 		omp_set_num_threads(num_omp_threads);
 		#pragma omp parallel \
@@ -233,6 +242,8 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
         
     } while (delta > threshold && loop++ < 500);
 
+
+	syscall(END_PARALLEL_SECTION);
     
     free(new_centers[0]);
     free(new_centers);

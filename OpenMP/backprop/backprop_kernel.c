@@ -6,8 +6,8 @@
 
 #include "backprop.h"
 
-#define STATS_START 325
-#define STATS_STOP 326
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +54,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   printf("Performing CPU computation\n");
 
   //simulator start stats collection
-  syscall(STATS_START);
+  syscall(BEGIN_PARALLEL_SECTION);
 
   bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
   bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);
@@ -64,6 +64,6 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);
 
   //simulator stop stats collection
-  syscall(STATS_STOP);
+  syscall(END_PARALLEL_SECTION);
 
 }

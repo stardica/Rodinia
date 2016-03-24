@@ -100,8 +100,8 @@ void usage(char *argv0) {
 /*---< main() >-------------------------------------------------------------*/
 int main(int argc, char **argv) {
            int     opt;
-    extern char   *optarg;
-    extern int     optind;
+           extern char   *optarg;
+           extern int     optind;
            int     nclusters=5;
            char   *filename = 0;           
            float  *buf;
@@ -184,8 +184,8 @@ int main(int argc, char **argv) {
      
 
         /* allocate space for attributes[] and read attributes of all objects */
-        buf           = (float*) malloc(numObjects*numAttributes*sizeof(float));
-        attributes    = (float**)malloc(numObjects*             sizeof(float*));
+        buf = (float*) malloc(numObjects*numAttributes*sizeof(float));
+        attributes = (float**)malloc(numObjects*             sizeof(float*));
         attributes[0] = (float*) malloc(numObjects*numAttributes*sizeof(float));
         for (i=1; i<numObjects; i++)
             attributes[i] = attributes[i-1] + numAttributes;
@@ -208,13 +208,7 @@ int main(int argc, char **argv) {
     for (i=0; i<nloops; i++) {
         
         cluster_centres = NULL;
-        cluster(numObjects,
-                numAttributes,
-                attributes,           /* [numObjects][numAttributes] */                
-                nclusters,
-                threshold,
-                &cluster_centres   
-               );
+        cluster(numObjects, numAttributes, attributes, nclusters, threshold, &cluster_centres);
      
     }
     timing = omp_get_wtime() - timing;
@@ -222,7 +216,8 @@ int main(int argc, char **argv) {
 
 	printf("number of Clusters %d\n",nclusters); 
 	printf("number of Attributes %d\n\n",numAttributes); 
-  /*  	printf("Cluster Centers Output\n"); 
+
+	/*	printf("Cluster Centers Output\n");
 	printf("The first number is cluster number and the following data is arribute value\n");
 	printf("=============================================================================\n\n");
 	
@@ -231,8 +226,8 @@ int main(int argc, char **argv) {
         for (j=0; j<numAttributes; j++)
             printf("%.2f ", cluster_centres[i][j]);
         printf("\n\n");
-    }
-*/
+    }*/
+
 	printf("Time for process: %f\n", timing);
 
     free(attributes);

@@ -81,27 +81,24 @@ int cluster(int      numObjects,      /* number of input objects */
             int      nclusters,
             float    threshold,       /* in:   */
             float ***cluster_centres /* out: [best_nclusters][numAttributes] */
-    
-            )
-{
+			){
+
     int    *membership;
     float **tmp_cluster_centres;
 
     membership = (int*) malloc(numObjects * sizeof(int));
    
     srand(7);
+
 	/* perform regular Kmeans */
-    tmp_cluster_centres = kmeans_clustering(attributes,
-                                            numAttributes,
-                                            numObjects,
-                                            nclusters,
-                                            threshold,
-                                            membership);      
+    tmp_cluster_centres = kmeans_clustering(attributes, numAttributes, numObjects, nclusters, threshold, membership);
 	
-    if (*cluster_centres) {
+    if (*cluster_centres)
+    {
 		free((*cluster_centres)[0]);
         free(*cluster_centres);
     }
+
     *cluster_centres = tmp_cluster_centres;
 
    

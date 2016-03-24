@@ -4,8 +4,8 @@
 #define BIGRND 0x7fffffff
 
 
-#define ETA 0.3       //eta value
-#define MOMENTUM 0.3  //momentum value
+#define ETA 0.3      //eta value
+#define MOMENTUM 0.3 //momentum value
 #define NUM_THREAD 4 //OpenMP threads
 
 
