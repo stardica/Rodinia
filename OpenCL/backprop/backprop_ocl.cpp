@@ -113,6 +113,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	char * source = (char *)calloc(sourcesize, sizeof(char)); 
 	if(!source) { printf("ERROR: calloc(%d) failed\n", sourcesize); return -1; }
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	// read the kernel core source
 	//char * kernel_bp1  = "bpnn_layerforward_ocl";
 	//char * kernel_bp2  = "bpnn_adjust_weights_ocl";
@@ -211,6 +213,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem hidden_partial_sum;
 	cl_mem hidden_delta_ocl;
 	cl_mem input_prev_weights_ocl;
+
+
   
 	//star changed this whole block...
 	/*input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);*/
@@ -239,8 +243,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_prev_weights_ocl\n"); return -1;}
 		
 	printf("Performing GPU computation\n");
-	syscall(BEGIN_PARALLEL_SECTION);
 	
+
 	//write buffers
 	err = clEnqueueWriteBuffer(cmd_queue, input_ocl, 1, 0, (in + 1) * sizeof(float), net->input_units, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer input_ocl\n"); return -1; }
@@ -303,13 +307,15 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	err = clEnqueueReadBuffer(cmd_queue, input_hidden_ocl, 1, 0, (in + 1) * (hid + 1) * sizeof(float), input_weights_one_dim, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
 
-	syscall(END_PARALLEL_SECTION);
+
   
 	clReleaseMemObject(input_ocl);
 	clReleaseMemObject(output_hidden_ocl);
 	clReleaseMemObject(input_hidden_ocl);
 	clReleaseMemObject(hidden_partial_sum);
 	clReleaseMemObject(input_prev_weights_ocl);
+
+	syscall(END_PARALLEL_SECTION);
   
 	free(input_weights_prev_one_dim);
 	free(partial_sum);
