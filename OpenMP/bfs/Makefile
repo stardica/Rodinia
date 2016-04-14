@@ -1,6 +1,6 @@
 # C compiler
 CC = g++
-CC_FLAGS = -g -fopenmp -O2
+CC_FLAGS = -g -fopenmp -O2 -m32
 
 all: bfs
 

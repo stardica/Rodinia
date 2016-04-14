@@ -242,7 +242,6 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
         
     } while (delta > threshold && loop++ < 500);
 
-
 	syscall(END_PARALLEL_SECTION);
     
     free(new_centers[0]);

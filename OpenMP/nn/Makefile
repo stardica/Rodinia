@@ -1,6 +1,6 @@
-LOCAL_CC = gcc -g -O2 -Wall
+LOCAL_CC = gcc -g -O2 -Wall -m32
 CC = gcc
-CFLAGS = -lm -fopenmp -Wall
+CFLAGS = -lm -fopenmp -Wall -m32
 
 
 all : nn

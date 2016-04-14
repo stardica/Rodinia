@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
 	timing = omp_get_wtime();
     for (i=0; i<nloops; i++) {
         
-        cluster_centres = NULL;
+    	cluster_centres = NULL;
         cluster(numObjects, numAttributes, attributes, nclusters, threshold, &cluster_centres);
      
     }

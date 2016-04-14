@@ -6,7 +6,12 @@
 #include <math.h>
 #include <sys/time.h>
 #include <omp.h>
+#include <unistd.h>
 #define OPENMP
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+
 //#define NUM_THREAD 4
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +156,8 @@ runTest( int argc, char** argv) {
 	printf("Num of threads: %d\n", omp_num_threads);
 	printf("Processing top-left matrix\n");
 	
+	syscall(BEGIN_PARALLEL_SECTION);
+
     for( int i = 0 ; i < max_cols-2 ; i++){
 #ifdef OPENMP
 	   omp_set_num_threads(omp_num_threads);
@@ -179,6 +186,8 @@ runTest( int argc, char** argv) {
 	      }
 
 	}
+
+	syscall(END_PARALLEL_SECTION);
 
 #define TRACEBACK
 #ifdef TRACEBACK

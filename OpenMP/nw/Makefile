@@ -1,6 +1,6 @@
 # C compiler
 CC = g++
-CC_FLAGS = -g -fopenmp
+CC_FLAGS = -g -fopenmp -m32
 
 all: needle
 

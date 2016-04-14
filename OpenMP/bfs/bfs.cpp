@@ -3,8 +3,12 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <unistd.h>
 //#define NUM_THREAD 4
 #define OPEN
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 int no_of_nodes;
 int edge_list_size;
@@ -115,8 +119,10 @@ void BFSGraph( int argc, char** argv)
 	printf("Start traversing the tree\n");
 	
 	int k=0;
+    bool stop;
+
+    syscall(BEGIN_PARALLEL_SECTION);
     
-	bool stop;
 	do
 	{
 		//if no thread changes this value then the loop stops
@@ -154,6 +160,8 @@ void BFSGraph( int argc, char** argv)
 		k++;
 	}
 	while(stop);
+
+	syscall(END_PARALLEL_SECTION);
 
 	//Store the result into a file
 	FILE *fpo = fopen("result.txt","w");

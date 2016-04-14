@@ -4,6 +4,10 @@
 #include <math.h>
 #include <sys/time.h>
 #include <omp.h>
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 #define MAX_ARGS 10
 #define REC_LENGTH 49	// size of a record in db
@@ -76,6 +80,8 @@ int main(int argc, char* argv[]) {
 	float *z;
 	z  = (float *) malloc(REC_WINDOW * sizeof(float));
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	while(!done) {
 		//Read in REC_WINDOW number of records
 		rec_count = fread(sandbox, REC_LENGTH, REC_WINDOW, fp);
@@ -131,6 +137,8 @@ int main(int argc, char* argv[]) {
 			}
 		}
 	}//End while loop
+
+	syscall(END_PARALLEL_SECTION);
 
 	fprintf(stderr, "The %d nearest neighbors are:\n", k);
 	for( j = 0 ; j < k ; j++ ) {
