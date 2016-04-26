@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 using namespace std;
 #define STR_SIZE	256
@@ -19,6 +20,9 @@ using namespace std;
 #define FACTOR_CHIP	0.5
 #define OPEN
 //#define NUM_THREAD 4
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 /* chip parameters	*/
 double t_chip = 0.0005;
@@ -232,14 +236,17 @@ int main(int argc, char **argv)
 	read_input(power, grid_rows, grid_cols, pfile);
 
 	printf("Start computing the transient temperature\n");
+	syscall(BEGIN_PARALLEL_SECTION);
 	compute_tran_temp(result,sim_time, temp, power, grid_rows, grid_cols);
+	syscall(END_PARALLEL_SECTION);
 	printf("Ending simulation\n");
 	/* output results	*/
 #ifdef VERBOSE
-	fprintf(stdout, "Final Temperatures:\n");
+
 #endif
 
 #ifdef OUTPUT
+	fprintf(stdout, "Final Temperatures:\n");
 	for(i=0; i < grid_rows * grid_cols; i++)
 	fprintf(stdout, "%d\t%g\n", i, temp[i]);
 #endif

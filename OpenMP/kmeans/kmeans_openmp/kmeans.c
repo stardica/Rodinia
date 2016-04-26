@@ -214,7 +214,7 @@ int main(int argc, char **argv) {
     timing = omp_get_wtime() - timing;
 	
 
-	printf("number of Clusters %d\n",nclusters); 
+	printf("number of Clusters %d\n",nclusters);
 	printf("number of Attributes %d\n\n",numAttributes); 
 
 	/*	printf("Cluster Centers Output\n");
@@ -236,4 +236,3 @@ int main(int argc, char **argv) {
     free(buf);
     return(0);
 }
-

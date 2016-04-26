@@ -5,7 +5,7 @@ CC_FLAGS = -g -fopenmp -O2 -m32
 all: kmeans
 
 kmeans: cluster.o getopt.o kmeans.o kmeans_clustering.o 
-	$(CC) $(CC_FLAGS) cluster.o getopt.o kmeans.o kmeans_clustering.o  -o kmeans -static
+	$(CC) $(CC_FLAGS) cluster.o getopt.o kmeans.o kmeans_clustering.o -o kmeans -static
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c -static
