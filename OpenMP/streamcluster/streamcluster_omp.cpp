@@ -1110,6 +1110,7 @@ void streamCluster( PStream* stream,
 		    long kmin, long kmax, int dim,
 		    long chunksize, long centersize, char* outfile )
 {
+
   block = (float*)malloc( chunksize*dim*sizeof(float) );
   float* centerBlock = (float*)malloc(centersize*dim*sizeof(float) );
   long* centerIDs = (long*)malloc(centersize*dim*sizeof(long));
@@ -1127,14 +1128,12 @@ void streamCluster( PStream* stream,
     points.p[i].coord = &block[i*dim];
   }
 
-	
-	
   Points centers;
   centers.dim = dim;
   centers.p = (Point *)malloc(centersize*sizeof(Point));
   centers.num = 0;
 
-  for( int i = 0; i< centersize; i++ ) {
+  for(int i = 0; i< centersize; i++ ) {
     centers.p[i].coord = &centerBlock[i*dim];
     centers.p[i].weight = 1.0;
   }
@@ -1200,8 +1199,8 @@ void streamCluster( PStream* stream,
   outcenterIDs( &centers, centerIDs, outfile);
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
+
   char *outfilename = new char[MAXNAMESIZE];
   char *infilename = new char[MAXNAMESIZE];
   long kmin, kmax, n, chunksize, clustersize;

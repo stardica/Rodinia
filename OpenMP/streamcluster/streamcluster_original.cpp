@@ -59,7 +59,7 @@ using namespace std;
 //#define ENABLE_THREADS  // comment this out to disable threads
 //#define INSERT_WASTE //uncomment this to insert waste computation into dist function
 
-#define CACHE_LINE 512 // cache line in byte
+#define CACHE_LINE 64 // cache line in byte
 
 /* this structure represents a point */
 /* these will be passed around to avoid copying coordinates */
