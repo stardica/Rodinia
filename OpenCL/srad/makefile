@@ -4,7 +4,7 @@
 # this is for the m2s runtime
 OPENCL_DIR = /home/stardica/Desktop/runtime
 OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -15,7 +15,7 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 OCL_INC_DIR = -I$(OPENCL_INC)
 OCL_LIB_DIR = -L$(OPENCL_LIB)
 
-C_C = gcc
+C_C = gcc -m32
 OCL_LIB = -lm2s-opencl
 #OCL_LIB = -lOpenCL
 
@@ -35,7 +35,7 @@ all: ./a.out
 		./util/timer/timer.o \
 		-lm \
 		$(OCL_LIB_DIR) \
-		$(OCL_LIB) -o srad
+		$(OCL_LIB) -o srad -static -pthread -ldl
 
 # ======================================================================================================================================================150
 #	MAIN FUNCTION

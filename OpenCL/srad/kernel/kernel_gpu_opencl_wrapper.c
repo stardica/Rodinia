@@ -175,55 +175,55 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	mem_size = sizeof(fp) * Ne; // get the size of float representation of input IMAGE
 
 	cl_mem d_I;
-	d_I = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_I = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_iN;
-	d_iN = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_i,NULL, &error );
+	d_iN = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_i,NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_iS;
-	d_iS = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_i,NULL, &error );
+	d_iS = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_i,NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_jE;
-	d_jE = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_j, NULL, &error );
+	d_jE = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_j, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_jW;
-	d_jW = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_j, NULL, &error );
+	d_jW = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size_j, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	// allocate memory for derivatives
 	cl_mem d_dN;
-	d_dN = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size, NULL, &error );
+	d_dN = clCreateBuffer(	context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_dS;
-	d_dS = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_dS = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_dW;
-	d_dW = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_dW = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_dE;
-	d_dE = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error );
+	d_dE = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	// allocate memory for coefficient on DEVICE
 	cl_mem d_c;
-	d_c = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_c = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	// allocate memory for partial sums on DEVICE
 
 	cl_mem d_sums;
-	d_sums = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_sums = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	cl_mem d_sums2;
-	d_sums2 = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error);
+	d_sums2 = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	

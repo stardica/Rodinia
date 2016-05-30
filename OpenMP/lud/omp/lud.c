@@ -21,32 +21,32 @@
 #include <getopt.h>
 #include <stdlib.h>
 #include <assert.h>
-
 #include "common.h"
 
 static int do_verify = 0;
-int omp_num_threads = 4;
+int omp_num_threads = 0;
 
 static struct option long_options[] = {
   /* name, has_arg, flag, val */
   {"input", 1, NULL, 'i'},
   {"size", 1, NULL, 's'},
   {"verify", 0, NULL, 'v'},
+  {"num_threads", 1, NULL, 'n'},
   {0,0,0,0}
 };
 
 extern void lud_omp(float *m, int matrix_dim);
 
 int main ( int argc, char *argv[]){
+
   int matrix_dim = 32; /* default size */
   int opt, option_index=0;
   func_ret_t ret;
   const char *input_file = NULL;
   float *m, *mm;
   stopwatch sw;
-
 	
-  while ((opt = getopt_long(argc, argv, "::vs:i:", long_options, &option_index)) != -1 ) 
+  while ((opt = getopt_long(argc, argv, "::vs:i:n:", long_options, &option_index)) != -1 )
   {
     switch(opt){
     case 'i':
@@ -57,10 +57,13 @@ int main ( int argc, char *argv[]){
       break;
     case 's':
       matrix_dim = atoi(optarg);
-      printf("Generate input matrix internally, size =%d\n", matrix_dim);
+      //printf("Generate input matrix internally, size =%d\n", matrix_dim);
       // fprintf(stderr, "Currently not supported, use -i instead\n");
       // fprintf(stderr, "Usage: %s [-v] [-s matrix_size|-i input_file]\n", argv[0]);
       // exit(EXIT_FAILURE);
+      break;
+    case 'n':
+    	omp_num_threads = atoi(optarg);
       break;
     case '?':
       fprintf(stderr, "invalid option\n");
@@ -112,7 +115,6 @@ int main ( int argc, char *argv[]){
 
   stopwatch_start(&sw);
   lud_omp(m, matrix_dim);
-  //lud_omp(4, matrix_dim);
   stopwatch_stop(&sw);
   printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 

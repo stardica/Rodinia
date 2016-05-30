@@ -1,4 +1,5 @@
 #define IN_RANGE(x, min, max)   ((x)>=(min) && (x)<=(max))
+#define BLOCK_SIZE 16
 
 __kernel void hotspot(  int iteration,  //number of iteration
                                global float *power,   //power input
