@@ -23,6 +23,11 @@
 #include <sys/resource.h>
 #include <limits.h>
 #include <omp.h>
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+
 
 #ifdef ENABLE_PARSEC_HOOKS
 #include <hooks.h>
@@ -46,7 +51,7 @@ using namespace std;
 //#define ENABLE_THREADS  // comment this out to disable threads
 //#define INSERT_WASTE //uncomment this to insert waste computation into dist function
 
-#define CACHE_LINE 512 // cache line in byte
+#define CACHE_LINE 64 // cache line in byte
 
 /* this structure represents a point */
 /* these will be passed around to avoid copying coordinates */
@@ -1108,7 +1113,7 @@ void outcenterIDs( Points* centers, long* centerIDs, char* outfile ) {
 
 void streamCluster( PStream* stream, 
 		    long kmin, long kmax, int dim,
-		    long chunksize, long centersize, char* outfile )
+		    long chunksize, long centersize, char* outfile)
 {
 
   block = (float*)malloc( chunksize*dim*sizeof(float) );
@@ -1159,6 +1164,8 @@ void streamCluster( PStream* stream,
     is_center = (bool*)calloc(points.num,sizeof(bool));
     center_table = (int*)malloc(points.num*sizeof(int));
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
     localSearch(&points,kmin, kmax,&kfinal);
 
     fprintf(stderr,"finish local search\n");
@@ -1194,9 +1201,12 @@ void streamCluster( PStream* stream,
   is_center = (bool*)calloc(centers.num,sizeof(bool));
   center_table = (int*)malloc(centers.num*sizeof(int));
 
-  localSearch( &centers, kmin, kmax ,&kfinal );
+  localSearch( &centers, kmin, kmax ,&kfinal);
   contcenters(&centers);
   outcenterIDs( &centers, centerIDs, outfile);
+
+  syscall(END_PARALLEL_SECTION);
+
 }
 
 int main(int argc, char **argv){
