@@ -5,7 +5,7 @@ endif
 
 # C compiler
 CC = gcc
-CC_FLAGS = -g -O3 -Wall -fopenmp -I$(MATRIX_DIR)
+CC_FLAGS = -g -O3 -Wall -fopenmp -I$(MATRIX_DIR) -m32
 
 # Matrix library path
 MATRIX_DIR = ../meschach_lib

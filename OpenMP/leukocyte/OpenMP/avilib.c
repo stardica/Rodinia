@@ -1,8 +1,8 @@
 /*
  *  avilib.c
  *
- *  Copyright (C) Thomas Östreich - June 2001
- *  multiple audio track support Copyright (C) 2002 Thomas Östreich 
+ *  Copyright (C) Thomas ï¿½streich - June 2001
+ *  multiple audio track support Copyright (C) 2002 Thomas ï¿½streich 
  *
  *  Original code:
  *  Copyright (C) 1999 Rainer Johanni <Rainer@Johanni.de> 
@@ -27,6 +27,7 @@
 
 #include "avilib.h"
 //#include <time.h>
+#include <stdio.h>
 
 #define INFO_LIST
 
@@ -1113,7 +1114,7 @@ avi_t *AVI_open_fd(int fd, int getIndex)
   
   AVI->mode = AVI_MODE_READ; /* open for reading */
   
-  // file alread open
+  // file already open
   AVI->fdes = fd;
   
   avi_parse_input_file(AVI, getIndex);
@@ -1141,7 +1142,11 @@ int avi_parse_input_file(avi_t *AVI, int getIndex)
   
   /* Read first 12 bytes and check that this is an AVI file */
 
+
+
    if( avi_read(AVI->fdes,data,12) != 12 ) ERR_EXIT(AVI_ERR_READ)
+
+
 
    if( strncasecmp(data  ,"RIFF",4) !=0 ||
        strncasecmp(data+8,"AVI ",4) !=0 ) ERR_EXIT(AVI_ERR_NO_AVI)

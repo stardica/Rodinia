@@ -7,6 +7,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <omp.h>
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 // Number of threads for OpenMP to use
 // (Only defined if we want to parallelize using OpenMP)

@@ -58,10 +58,12 @@ void ellipsetrack(avi_t *video, double *xc0, double *yc0, int Nc, int R, int Np,
 	long long  MGVF_time = 0;
 	long long snake_time = 0;
 	
+	syscall(BEGIN_PARALLEL_SECTION);
 	
 	// Process each frame
 	int frame_num, cell_num;
-	for (frame_num = 1; frame_num <= Nf; frame_num++) {	 
+	for (frame_num = 1; frame_num <= Nf; frame_num++)
+	{
 		printf("\rProcessing frame %d / %d", frame_num, Nf);
 		fflush(stdout);
 		
@@ -165,6 +167,8 @@ void ellipsetrack(avi_t *video, double *xc0, double *yc0, int Nc, int R, int Np,
 			free(ri);
 	    }
 
+
+
 #ifdef OUTPUT
 		if (frame_num == Nf)
 		  {
@@ -184,6 +188,8 @@ void ellipsetrack(avi_t *video, double *xc0, double *yc0, int Nc, int R, int Np,
 		//printf("\n");
 	}
 	
+	syscall(END_PARALLEL_SECTION);
+
 	// Free temporary memory
 	free(t);
 	free_2d_double(xc);

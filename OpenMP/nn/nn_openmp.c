@@ -80,35 +80,43 @@ int main(int argc, char* argv[]) {
 	float *z;
 	z  = (float *) malloc(REC_WINDOW * sizeof(float));
 
-	syscall(BEGIN_PARALLEL_SECTION);
-
-	while(!done) {
+	while(!done)
+	{
 		//Read in REC_WINDOW number of records
 		rec_count = fread(sandbox, REC_LENGTH, REC_WINDOW, fp);
-		if( rec_count != REC_WINDOW ) {
-			if(!ferror(flist)) {// an eof occured
+		if( rec_count != REC_WINDOW )
+		{
+			if(!ferror(flist))
+			{// an eof occurred
 				fclose(fp);
 
 				if(feof(flist))
 		  			done = 1;
-				else {
-	 				if(fscanf(flist, "%s\n", dbname) != 1) {
-	    					fprintf(stderr, "error reading filelist\n");
+				else
+				{
+	 				if(fscanf(flist, "%s\n", dbname) != 1)
+	 				{
+	    					fprintf(stderr, "error reading file list\n");
 	    					exit(0);
 					}
 
 	  				fp = fopen(dbname, "r");
 
-	  				if(!fp) {
+	  				if(!fp)
+	  				{
 					    printf("error opening a db\n");
 					    exit(1);
 	  				}
 				}
-			} else {
+			}
+			else
+			{
 				perror("Error");
 				exit(0);
 			}
 		}
+
+		syscall(BEGIN_PARALLEL_SECTION);
 
 		/* Launch threads to  */
 		#pragma omp parallel for shared(z, target_lat, target_long) private(i, rec_iter, tmp_lat, tmp_long)
@@ -117,6 +125,7 @@ int main(int argc, char* argv[]) {
 			sscanf(rec_iter, "%f %f", &tmp_lat, &tmp_long);
 			z[i] = sqrt(( (tmp_lat-target_lat) * (tmp_lat-target_lat) )+( (tmp_long-target_long) * (tmp_long-target_long) ));
 		} /* omp end parallel */
+
 		#pragma omp barrier
 
 		for( i = 0 ; i < rec_count ; i++ ) {

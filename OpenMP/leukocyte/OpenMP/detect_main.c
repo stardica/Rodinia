@@ -1,6 +1,9 @@
 #include "find_ellipse.h"
 #include "track_ellipse.h"
 
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+
 int omp_num_threads = 1;
 
 int main(int argc, char ** argv) {

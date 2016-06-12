@@ -11,6 +11,10 @@
 #include <string.h>
 #include <math.h>
 #include <omp.h>
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 void random_matrix(float *I, int rows, int cols);
 
@@ -112,19 +116,22 @@ int main(int argc, char* argv[])
    
 	printf("Start the SRAD main loop\n");
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
 #ifdef ITERATION
-	for (iter=0; iter< niter; iter++){
+	for (iter=0; iter< niter; iter++)
+	{
 #endif        
 		sum=0; sum2=0;     
-		for (i=r1; i<=r2; i++) 
+		for (i=r1; i<=r2; i++)
 		{
-            		for (j=c1; j<=c2; j++) 
+            for (j=c1; j<=c2; j++)
 			{
-                		tmp   = J[i * cols + j];
-                		sum  += tmp ;
-                		sum2 += tmp*tmp;
-           		 }
-        	}
+           		tmp   = J[i * cols + j];
+           		sum  += tmp ;
+           		sum2 += tmp*tmp;
+        	 }
+        }
         	meanROI = sum / size_R;
         	varROI  = (sum2 / size_R) - meanROI*meanROI;
         	q0sqr   = varROI / (meanROI*meanROI);
@@ -209,6 +216,7 @@ int main(int argc, char* argv[])
 	}
 #endif
 
+	syscall(END_PARALLEL_SECTION);
 
 #ifdef OUTPUT
 	for( int i = 0 ; i < rows ; i++)

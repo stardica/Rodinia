@@ -6,6 +6,10 @@
 #include <fstream>
 #include <cmath>
 #include <omp.h>
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 struct float3 { float x, y, z; };
 
@@ -436,6 +440,9 @@ int main(int argc, char** argv)
 #ifdef _OPENMP
 	double start = omp_get_wtime();
 #endif
+
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	// Begin iterations
 	for(int i = 0; i < iterations; i++)
 	{
@@ -450,6 +457,8 @@ int main(int argc, char** argv)
 			time_step(j, nelr, old_variables, variables, step_factors, fluxes);
 		}
 	}
+
+	syscall(END_PARALLEL_SECTION);
 
 #ifdef _OPENMP
 	double end = omp_get_wtime();
