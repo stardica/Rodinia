@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 // declaration, forward
 void runTest( int argc, char** argv);
+
 int maximum( int a, int b, int c){
 
 	int k;
@@ -193,7 +194,7 @@ runTest( int argc, char** argv) {
 #ifdef TRACEBACK
 	
 	FILE *fpo = fopen("result.txt","w");
-	fprintf(fpo, "print traceback value CPU:\n");
+	fprintf(fpo, "print trace back value CPU:\n");
     
 	for (int i = max_rows - 2,  j = max_rows - 2; i>=0, j>=0;){
 		int nw, n, w, traceback;
@@ -255,6 +256,3 @@ runTest( int argc, char** argv) {
 	free(output_itemsets);
 
 }
-
-
-

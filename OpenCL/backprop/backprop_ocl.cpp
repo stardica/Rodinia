@@ -113,8 +113,6 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	char * source = (char *)calloc(sourcesize, sizeof(char)); 
 	if(!source) { printf("ERROR: calloc(%d) failed\n", sourcesize); return -1; }
 
-	syscall(BEGIN_PARALLEL_SECTION);
-
 	// read the kernel core source
 	//char * kernel_bp1  = "bpnn_layerforward_ocl";
 	//char * kernel_bp2  = "bpnn_adjust_weights_ocl";
@@ -215,6 +213,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem input_prev_weights_ocl;
 
 
+	syscall(BEGIN_PARALLEL_SECTION);
   
 	//star changed this whole block...
 	/*input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);*/
@@ -244,7 +243,6 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 		
 	printf("Performing GPU computation\n");
 	
-
 	//write buffers
 	err = clEnqueueWriteBuffer(cmd_queue, input_ocl, 1, 0, (in + 1) * sizeof(float), net->input_units, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer input_ocl\n"); return -1; }
