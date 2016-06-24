@@ -590,11 +590,11 @@ void ecc(	fp timeinst,
 	Mgi = 1;																			// Intracellular Mg  [mM]
 
 	// Nernst Potentials
-	ena_junc = (1/FoRT)*log(Nao/initvalu_32);													// [mV]
-	ena_sl = (1/FoRT)*log(Nao/initvalu_33);													// [mV]
-	ek = (1/FoRT)*log(Ko/initvalu_35);														// [mV]
-	eca_junc = (1/FoRT/2)*log(Cao/initvalu_36);												// [mV]
-	eca_sl = (1/FoRT/2)*log(Cao/initvalu_37);													// [mV]
+	ena_junc = (1/FoRT)*log(Nao/initvalu_32);											// [mV]
+	ena_sl = (1/FoRT)*log(Nao/initvalu_33);												// [mV]
+	ek = (1/FoRT)*log(Ko/initvalu_35);													// [mV]
+	eca_junc = (1/FoRT/2)*log(Cao/initvalu_36);											// [mV]
+	eca_sl = (1/FoRT/2)*log(Cao/initvalu_37);											// [mV]
 	ecl = (1/FoRT)*log(Cli/Clo);														// [mV]
 
 	// Na transport parameters

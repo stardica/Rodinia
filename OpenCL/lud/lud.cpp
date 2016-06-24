@@ -26,6 +26,7 @@
 #include <CL/cl.h>
 #include <string.h>
 #include <string>
+#include <unistd.h>
 
 #ifdef RD_WG_SIZE_0_0
 #define BLOCK_SIZE RD_WG_SIZE_0_0
@@ -36,6 +37,9 @@
 #else
 #define BLOCK_SIZE 16
 #endif
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 
 static int do_verify = 0;
@@ -212,10 +216,10 @@ int main (int argc, char *argv[]){
 	//star added this
 	float * star_temp = (float*) malloc(sizeof(float)*matrix_dim*matrix_dim);
 	cl_mem d_star_temp;
-	d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err );
+	d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);
 
 	cl_mem d_m;
-	d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err );
+	d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);
 	
 	if(err != CL_SUCCESS)
 	{
@@ -224,6 +228,9 @@ int main (int argc, char *argv[]){
 
 	/* beginning of timing point */
 	stopwatch_start(&sw);
+
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	err = clEnqueueWriteBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
 	if(err != CL_SUCCESS)
 	{
@@ -325,6 +332,8 @@ int main (int argc, char *argv[]){
 	{
 		printf("ERROR: clEnqueueReadBuffer  d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err); return -1;
 	}
+
+	syscall(END_PARALLEL_SECTION);
 
 	//printf("Read buffer.\n");
 	//fflush(stdout);

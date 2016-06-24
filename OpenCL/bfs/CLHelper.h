@@ -420,7 +420,7 @@ void _clRelease()
 cl_mem _clCreateAndCpyMem(int size, void * h_mem_source) throw(string){
 	cl_mem d_mem;
 	d_mem = clCreateBuffer(oclHandles.context,	CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,  \
-									size, h_mem_source, &oclHandles.cl_status);
+									size, h_mem_source, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clCreateAndCpyMem()"));
@@ -432,7 +432,7 @@ cl_mem _clCreateAndCpyMem(int size, void * h_mem_source) throw(string){
 //--date:	17/01/2011	
 cl_mem _clMallocRW(int size, void * h_mem_ptr) throw(string){
  	cl_mem d_mem;
-	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size, h_mem_ptr, &oclHandles.cl_status);
+	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, size, h_mem_ptr, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clMallocRW"));
@@ -444,7 +444,7 @@ cl_mem _clMallocRW(int size, void * h_mem_ptr) throw(string){
 //--date:	17/01/2011	
 cl_mem _clMalloc(int size, void * h_mem_ptr) throw(string){
  	cl_mem d_mem;
-	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, size, h_mem_ptr, &oclHandles.cl_status);
+	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, size, h_mem_ptr, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clMalloc"));
@@ -469,14 +469,14 @@ cl_mem _clCreateAndCpyPinnedMem(int size, float* h_mem_source) throw(string){
 	cl_mem d_mem, d_mem_pinned;
 	float * h_mem_pinned = NULL;
 	d_mem_pinned = clCreateBuffer(oclHandles.context,	CL_MEM_READ_ONLY|CL_MEM_ALLOC_HOST_PTR,  \
-									size, NULL, &oclHandles.cl_status);
+									size, NULL, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clCreateAndCpyMem()->d_mem_pinned"));
 	#endif
 	//------------
 	d_mem = clCreateBuffer(oclHandles.context,	CL_MEM_READ_ONLY,  \
-									size, NULL, &oclHandles.cl_status);
+									size, NULL, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clCreateAndCpyMem() -> d_mem "));
@@ -511,7 +511,7 @@ cl_mem _clCreateAndCpyPinnedMem(int size, float* h_mem_source) throw(string){
 //--cambine:create write only buffer on device
 cl_mem _clMallocWO(int size) throw(string){
 	cl_mem d_mem;
-	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_WRITE_ONLY, size, 0, &oclHandles.cl_status);
+	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_WRITE_ONLY, size, 0, &oclHandles.cl_status, CL_TRUE);
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS)
 		throw(string("excpetion in _clCreateMem()"));

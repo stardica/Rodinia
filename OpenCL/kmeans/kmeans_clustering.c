@@ -67,6 +67,10 @@
 #include <math.h>
 #include <omp.h>
 #include "kmeans.h"
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 #define RANDOM_MAX 2147483647
 
@@ -142,6 +146,9 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
         new_centers[i] = new_centers[i-1] + nfeatures;
 
 	/* iterate until convergence */
+
+    syscall(BEGIN_PARALLEL_SECTION);
+
 	do {
         delta = 0.0;
 		// CUDA
@@ -167,6 +174,9 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
 		}	 
 		c++;
     } while ((delta > threshold) && (loop++ < 500));	/* makes sure loop terminates */
+
+	syscall(END_PARALLEL_SECTION);
+
 	printf("iterated %d times\n", c);
     free(new_centers[0]);
     free(new_centers);

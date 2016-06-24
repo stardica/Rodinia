@@ -6,6 +6,10 @@
 #include <string>
 #include <cstring>
 #include "bfs.h"
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 #ifdef  PROFILING
 #include "timer.h"
@@ -274,8 +278,13 @@ int main(int argc, char * argv[]){
 		
 		//---------------------------------------------------------
 		//--gpu entry
+
+		syscall(BEGIN_PARALLEL_SECTION);
+
 		run_bfs_gpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);	
 		
+		syscall(END_PARALLEL_SECTION);
+
 		//---------------------------------------------------------
 		//--cpu entry
 		// initalize the memory again

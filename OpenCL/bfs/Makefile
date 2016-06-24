@@ -2,7 +2,7 @@
 # this is for the m2s runtime
 OPENCL_DIR = /home/stardica/Desktop/runtime
 OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -15,7 +15,7 @@ CC = g++
 
 SRC = bfs.cpp timer.cc
 
-CC_FLAGS = -g -O2
+CC_FLAGS = -g -O2 -m32
 
 EXE = bfs
 

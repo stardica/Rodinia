@@ -13,8 +13,8 @@ all: myocyte
 
 myocyte:	main.o
 	gcc	main.o \
-			-lm -fopenmp \
-	-o myocyte
+			-m32 -lm -fopenmp \
+	-o myocyte -static
 
 # compile main function file into object (binary)
 main.o: 	main.c \
@@ -28,7 +28,7 @@ main.o: 	main.c \
 				file.c \
 				timer.c
 	gcc	main.c \
-			-c -O3 -fopenmp
+			-m32 -c -O3 -fopenmp -static
 
 # delete all object files
 clean:
