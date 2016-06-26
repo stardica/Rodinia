@@ -1,21 +1,21 @@
 #include ../../common/make.config
 
 # this is for the m2s runtime
-#OPENCL_DIR = /home/stardica/Desktop/runtime
-#OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-#OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
+OPENCL_DIR = /home/stardica/Desktop/runtime
+OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 # AMD_DIR
 # this is for the amdapp sdk.
-OPENCL_DIR = /opt/AMDAPP
-OPENCL_INC = $(OPENCL_DIR)/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
+#OPENCL_DIR = /opt/AMDAPP
+#OPENCL_INC = $(OPENCL_DIR)/include/ 
+#OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
 
 
-C_C = gcc
-OCL_LIB = -lOpenCL
-#OCL_LIB = -lm2s-opencl
+C_C = gcc -m32
+#OCL_LIB = -lOpenCL
+OCL_LIB = -lm2s-opencl
 
 all: b+tree
 
@@ -34,7 +34,7 @@ b+tree:	./main.o \
 			-lm \
 			-L$(OPENCL_LIB) \
 			$(OCL_LIB) \
-	        -o b+tree
+	        -o b+tree -static -pthread -ldl -lrt
 
 
 main.o:	./common.h \

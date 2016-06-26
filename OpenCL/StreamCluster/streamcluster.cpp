@@ -22,6 +22,10 @@
 #include "streamcluster.h"
 #include "CLHelper.h"
 #include "streamcluster_cl.h"
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 using namespace std;
 
@@ -41,7 +45,7 @@ using namespace std;
 //#define ENABLE_THREADS  // comment this out to disable threads
 //#define INSERT_WASTE 		//uncomment this to insert waste computation into dist function
 
-#define CACHE_LINE 512 		// cache line in byte
+#define CACHE_LINE 64 		// cache line in byte
 
 
 /* global */
@@ -818,9 +822,14 @@ void streamCluster( PStream* stream,
     is_center = (bool*)calloc(points.num,sizeof(bool));
     center_table = (int*)malloc(points.num*sizeof(int));
 
+    printf("copy centers\n");
+
     localSearch(&points,kmin, kmax,&kfinal);
 
     fprintf(stderr,"finish local search\n");
+
+    printf("copy centers2\n");
+
     contcenters(&points);
     if( kfinal + centers.num > centersize ) {
       //here we don't handle the situation where # of centers gets too large. 
@@ -831,6 +840,8 @@ void streamCluster( PStream* stream,
 #ifdef PRINTINFO
     printf("finish cont center\n");
 #endif
+
+
 
     copycenters(&points, &centers, centerIDs, IDoffset);
     IDoffset += numRead;
@@ -846,6 +857,8 @@ void streamCluster( PStream* stream,
     }
   }
 
+  syscall(BEGIN_PARALLEL_SECTION);
+
   //finally cluster all temp centers
   switch_membership = (char*)malloc(centers.num*sizeof(char));
   is_center = (bool*)calloc(centers.num,sizeof(bool));
@@ -854,6 +867,8 @@ void streamCluster( PStream* stream,
   localSearch( &centers, kmin, kmax ,&kfinal );
   contcenters(&centers);
   outcenterIDs( &centers, centerIDs, outfile);
+
+  syscall(END_PARALLEL_SECTION);
 }
 
 int main(int argc, char **argv)

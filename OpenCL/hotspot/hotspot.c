@@ -1,5 +1,9 @@
 #include "hotspot.h"
 #include "paths.h"
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 
 void writeoutput(float *vect, int grid_rows, int grid_cols, char *file) {
@@ -306,18 +310,20 @@ int main(int argc, char** argv) {
 
 	long long start_time = get_time();
 	
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	// Create two temperature matrices and copy the temperature input data
 	cl_mem MatrixTemp[2];
 
 	// Create input memory buffers on device
-	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error);
+	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
 	// Copy the power input data
-	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error);
+	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
 	printf("buffers created\n");
@@ -341,6 +347,8 @@ int main(int argc, char** argv) {
 	error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
+	syscall(END_PARALLEL_SECTION);
+
 	clReleaseMemObject(MatrixTemp[0]);
 	clReleaseMemObject(MatrixTemp[1]);
 	clReleaseMemObject(MatrixPower);

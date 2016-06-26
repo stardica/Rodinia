@@ -7,6 +7,10 @@
 #include "./kernel_gpu_opencl_wrapper.h"
 
 #include "kernel_paths.h"
+#include <unistd.h>
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
 
 
 kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, jW, iter, mem_size_i, mem_size_j){
@@ -174,6 +178,8 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	int mem_size; // matrix memory size
 	mem_size = sizeof(fp) * Ne; // get the size of float representation of input IMAGE
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	cl_mem d_I;
 	d_I = clCreateBuffer(context, CL_MEM_READ_WRITE, mem_size, NULL, &error, CL_TRUE);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
@@ -274,9 +280,14 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	error = clSetKernelArg(	extract_kernel, 1, sizeof(cl_mem), (void *) &d_I);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
+
+
 	//launch kernel
 	error = clEnqueueNDRangeKernel(command_queue, extract_kernel, 1, 0, global_work_size, local_work_size, 0, NULL, NULL);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
+
+	printf("here_1\n");
+	fflush(stdout);
 
 	//Synchronization - wait for all operations in the command queue so far to finish
 	
@@ -429,9 +440,16 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 
 		// Prepare kernel
 		
+
+
+
 		// launch kernel
 		error = clEnqueueNDRangeKernel(command_queue, prepare_kernel, 1, NULL, 	global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
+
+		printf("here_2\n");
+		fflush(stdout);
+
 
 		// synchronize
 		// error = clFinish(command_queue);
@@ -466,6 +484,10 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 			error = clEnqueueNDRangeKernel(command_queue, reduce_kernel, 1, NULL, global_work_size2, local_work_size, 0, NULL, NULL);
 			if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
+			printf("here_3\n");
+			fflush(stdout);
+
+
 			// synchronize
 			// error = clFinish(command_queue);
 			// if (error != CL_SUCCESS) 
@@ -491,6 +513,9 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 
 		}
 
+		printf("out of loop\n");
+		fflush(stdout);
+
 		// copy total sums to device
 		error = clEnqueueReadBuffer(command_queue, d_sums, CL_TRUE, 0, mem_size_single, &total, 0, 0, 0);
 		if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
@@ -514,6 +539,9 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 		error = clEnqueueNDRangeKernel(command_queue, srad_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);};
 
+		printf("here_4\n");
+		fflush(stdout);
+
 		// synchronize
 		// error = clFinish(command_queue);
 		// if (error != CL_SUCCESS) 
@@ -524,6 +552,9 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 		//launch kernel
 		error = clEnqueueNDRangeKernel(command_queue, srad2_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
+
+		printf("here_5\n");
+		fflush(stdout);
 
 		// synchronize
 		// error = clFinish(command_queue);
@@ -552,6 +583,9 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	error = clEnqueueNDRangeKernel(command_queue, compress_kernel, 1, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
+	printf("here_6\n");
+	fflush(stdout);
+
 
 	//synchronize
 	error = clFinish(command_queue);
@@ -561,13 +595,15 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	//COPY RESULTS BACK TO CPU
 	
 
-	error = clEnqueueReadBuffer(command_queue, d_I, CL_TRUE, 0, mem_size, image, 0, NULL, NULL);
+	error = clEnqueueReadBuffer(command_queue, d_I, CL_TRUE, 0, mem_size, image, 0, 0, 0);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
 	// int i;
 	// for(i=0; i<100; i++){
 		// printf("%f ", image[i]);
 	// }
+
+	syscall(END_PARALLEL_SECTION);
 
 
 	// OpenCL structures

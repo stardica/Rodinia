@@ -3,7 +3,7 @@
 # this is for the m2s runtime
 OPENCL_DIR = /home/stardica/Desktop/runtime
 OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -11,7 +11,7 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
-C_C = gcc
+C_C = gcc -m32
 #OCL_LIB = -lOpenCL
 OCL_LIB = -lm2s-opencl
 
@@ -33,7 +33,7 @@ all: myocyte
 			-lm \
 			-L$(OPENCL_LIB) \
                         $(OCL_LIB) \
-                        -o myocyte
+                        -o myocyte -static -pthread -ldl -lrt
 # ========================================================================================================================================================================================================200
 #	OBJECTS (COMPILE SOURCE FILES INTO OBJECTS)
 # ========================================================================================================================================================================================================200
@@ -49,7 +49,7 @@ all: myocyte
 			-c \
 			-o ./main.o \
 			-O3 \
-			-g
+			-g -m32 
 
 # ======================================================================================================================================================150
 #	KERNELS

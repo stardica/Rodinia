@@ -39,6 +39,7 @@
 
 #include "kernel_gpu_opencl_wrapper.h"					// (in directory)
 #include "kernel_paths.h"
+#include <unistd.h>
 
 //======================================================================================================================================================150
 //	END
@@ -47,6 +48,10 @@
 //========================================================================================================================================================================================================200
 //	MAIN FUNCTION
 //========================================================================================================================================================================================================200
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+
 
 int 
 kernel_gpu_opencl_wrapper(	int xmax,
@@ -289,6 +294,8 @@ kernel_gpu_opencl_wrapper(	int xmax,
 	//	d_initvalu_mem
 	//====================================================================================================100
 
+	syscall(BEGIN_PARALLEL_SECTION);
+
 	int d_initvalu_mem;
 	d_initvalu_mem = EQUATIONS * sizeof(fp);
 	cl_mem d_initvalu;
@@ -296,7 +303,7 @@ kernel_gpu_opencl_wrapper(	int xmax,
 								CL_MEM_READ_WRITE,			// flags
 								d_initvalu_mem,				// size of buffer
 								NULL,						// host pointer (optional)
-								&error );					// returned error
+								&error, CL_TRUE);					// returned error
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -311,7 +318,7 @@ kernel_gpu_opencl_wrapper(	int xmax,
 								CL_MEM_READ_WRITE, 
 								d_finavalu_mem, 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -326,7 +333,7 @@ kernel_gpu_opencl_wrapper(	int xmax,
 								CL_MEM_READ_WRITE, 
 								d_params_mem, 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -341,7 +348,7 @@ kernel_gpu_opencl_wrapper(	int xmax,
 							CL_MEM_READ_WRITE, 
 							d_com_mem, 
 							NULL, 
-							&error );
+							&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -390,6 +397,8 @@ kernel_gpu_opencl_wrapper(	int xmax,
 			// // }
 		// // }
 	// // }
+
+	syscall(END_PARALLEL_SECTION);
 
 	time3 = get_time();
 

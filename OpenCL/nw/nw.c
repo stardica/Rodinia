@@ -308,18 +308,18 @@ int main(int argc, char **argv){
 	cl_mem input_itemsets_l;
 	cl_mem reference_l;
 
-	input_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err );
+	input_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	reference_d		 = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err );
+	reference_d		 = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer reference (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	output_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err );
+	output_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
 	
 
 	//star added here
-	input_itemsets_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), NULL, &err );
+	input_itemsets_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), NULL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	reference_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, NULL, &err );
+	reference_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, NULL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
 	
 	

@@ -270,7 +270,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								knodes_mem, 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -283,7 +283,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -296,7 +296,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -309,7 +309,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -322,7 +322,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -335,7 +335,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(int), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -348,7 +348,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 							CL_MEM_READ_WRITE, 
 							count*sizeof(int), 
 							NULL, 
-							&error );
+							&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -369,7 +369,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 							CL_MEM_READ_WRITE, 
 							count*sizeof(int), 
 							NULL, 
-							&error );
+							&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -382,7 +382,7 @@ kernel_gpu_opencl_wrapper_2(knode *knodes,
 							CL_MEM_READ_WRITE, 
 							count*sizeof(int), 
 							NULL, 
-							&error );
+							&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 

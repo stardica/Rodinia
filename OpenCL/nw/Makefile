@@ -2,7 +2,7 @@
 # this is for the m2s runtime
 OPENCL_DIR = /home/stardica/Desktop/runtime
 OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -13,7 +13,7 @@ OPENCL_LIB = $(OPENCL_DIR)/Release/ -lm2s-opencl
 #C compiler
 CC = g++
 
-CC_FLAGS = -g -O3 -Wall
+CC_FLAGS = -g -O3 -Wall -m32
 
 EXE = nw
 

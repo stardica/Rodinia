@@ -680,7 +680,7 @@ cl_mem _clMalloc(int size) throw(string){
 	double t1 = gettime();
 #endif
  	cl_mem d_mem;
-	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE, size, NULL, &oclHandles.cl_status);
+	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE, size, NULL, &oclHandles.cl_status, CL_TRUE);
 #ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 	  oclHandles.error_str = "excpetion in _clMalloc -> ";
@@ -726,7 +726,7 @@ cl_mem _clMalloc(int size) throw(string){
 
 void* _clMallocHost(int size)throw(string){
 	void * mem_h;
-	oclHandles.pinned_mem_out = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE|CL_MEM_ALLOC_HOST_PTR, size, NULL, &oclHandles.cl_status);
+	oclHandles.pinned_mem_out = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE|CL_MEM_ALLOC_HOST_PTR, size, NULL, &oclHandles.cl_status, CL_TRUE);
 #ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 	  oclHandles.error_str = "excpetion in _clMallocHost -> clCreateBuffer";

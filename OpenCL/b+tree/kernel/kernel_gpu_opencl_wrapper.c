@@ -269,7 +269,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								records_mem, 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -282,7 +282,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								knodes_mem, 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -295,7 +295,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -308,7 +308,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -321,7 +321,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(long), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 
@@ -342,7 +342,7 @@ kernel_gpu_opencl_wrapper(	record *records,
 								CL_MEM_READ_WRITE, 
 								count*sizeof(record), 
 								NULL, 
-								&error );
+								&error, CL_TRUE);
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);
 

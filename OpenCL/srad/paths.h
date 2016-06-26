@@ -9,8 +9,8 @@
 #define PATHS_H_
 
 
-char image_file[100] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image_small.pgm";
-char image_output[200] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image_output_small_cl.pgm";
+char image_file[250] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image.pgm";
+char image_output[250] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image_output.pgm";
 
 
 #endif /* PATHS_H_ */

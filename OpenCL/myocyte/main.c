@@ -271,7 +271,6 @@ main(	int argc,
 
 		kernel_gpu_opencl_wrapper(	xmax,					// span
 									workload,				// # of workloads
-
 									y,
 									x,
 									params,

@@ -79,7 +79,7 @@ write_graphics(	char* filename,
 	// if matrix is saved row major in memory (C)
 	if(major==0){
 		for(i=0; i<data_rows; i++){
-		printf("reading row %d of %d\n", i, data_rows); 
+		//printf("reading row %d of %d\n", i, data_rows);
 			for(j=0; j<data_cols; j++){
 				fprintf(fid, "%d ", (int)input[i*data_cols+j]);
 			}

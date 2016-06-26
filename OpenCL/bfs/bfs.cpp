@@ -18,7 +18,7 @@
 #include "CLHelper.h"
 #include "util.h"
 
-#define MAX_THREADS_PER_BLOCK 1024
+#define MAX_THREADS_PER_BLOCK 256
 
 //Structure to hold a node information
 struct Node
@@ -136,7 +136,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 			
 			_clMemcpyD2H(d_over, sizeof(int), &h_over);
 			//printf("mem copy\n");	
-			
+
 			}while(h_over);
 			
 		_clFinish();
@@ -173,7 +173,8 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 		e_str += msg;
 		throw(e_str);
 	}
-	return ;
+
+	return;
 }
 
 void Usage(int argc, char**argv){
