@@ -9,11 +9,13 @@ typedef struct {
   //float *coord;
   long assign;  /* number of point where this one is assigned */
   float cost;  /* cost of that assignment, weight*distance */
+
 } Point_Struct;
 
 
 //#define Elements
 __kernel void memset_kernel(__global char * mem_d, short val, int number_bytes){
+	
 	const int thread_id = get_global_id(0);
 	mem_d[thread_id] = val;
 }
@@ -34,31 +36,41 @@ __kernel void pgain_kernel(
 	const int thread_id = get_global_id(0);
 	const int local_id = get_local_id(0);
 	
-	if(thread_id<num){
+	if(thread_id<num)
+	{
 	  // coordinate mapping of point[x] to shared mem
 	  if(local_id == 0)
-	   	for(int i=0; i<dim; i++){ 
+	  {
+	   	for(int i=0; i<dim; i++)
+		{ 
 	   		coord_s[i] = coord_d[i*num + x];
 	   	}
-	  barrier(CLK_LOCAL_MEM_FENCE);
+	  }
+
+	  //barrier(CLK_LOCAL_MEM_FENCE);
 	
 	  // cost between this point and point[x]: euclidean distance multiplied by weight
 	  float x_cost = 0.0;
+
 	  for(int i=0; i<dim; i++)
 		  x_cost += (coord_d[(i*num)+thread_id]-coord_s[i]) * (coord_d[(i*num)+thread_id]-coord_s[i]);
+
 	  x_cost = x_cost * p[thread_id].weight;
 	
 	  float current_cost = p[thread_id].cost;
 
-	  int base = thread_id*(K+1);	 
+	  int base = thread_id*(K+1);
+
 	  // if computed cost is less then original (it saves), mark it as to reassign	  
-	  if ( x_cost < current_cost ){
+	  if ( x_cost < current_cost )
+	  {
 		  switch_membership_d[thread_id] = '1';
 	      int addr_1 = base + K;
 	      work_mem_d[addr_1] = x_cost - current_cost;
 	  }
 	  // if computed cost is larger, save the difference
-	  else {
+	  else
+	  {
 	      int assign = p[thread_id].assign;
 	      int addr_2 = base + center_table_d[assign];
 	      work_mem_d[addr_2] += current_cost - x_cost;

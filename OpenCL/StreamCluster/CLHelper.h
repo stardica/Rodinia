@@ -461,7 +461,7 @@ void _clInit(string device_type, int device_id)throw(string){
     if ((resultCL != CL_SUCCESS) || (oclHandles.program == NULL))
         throw(string("InitCL()::Error: Loading Binary into cl_program. (clCreateProgramWithBinary)"));   */ 
 
-	//CDA6918 changes star here
+	//star changes star here
 	//get binanry file
 	FILE *fp = fopen(kernel_binary, "rb");
 	if (fp == NULL)
@@ -490,9 +490,6 @@ void _clInit(string device_type, int device_id)throw(string){
 	{
 		printf("error in clCreateProgramWithBinary\n");
 	}
-
-
-
 
     //insert debug information
     std::string options= "";
@@ -581,7 +578,7 @@ void _clInit(string device_type, int device_id)throw(string){
 
         oclHandles.kernel.push_back(kernel);
     }
-  //get resource alocation information
+  //get resource allocation information
 #ifdef RES_MSG
     char * build_log;
     size_t ret_val_size;
@@ -1170,8 +1167,8 @@ void _clInvokeKernel(int kernel_id, int work_items, int work_group_size) throw(s
 	  work_items = work_items + (work_group_size-(work_items%work_group_size));
   	size_t local_work_size[] = {work_group_size, 1};
 	size_t global_work_size[] = {work_items, 1};
-	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, \
-											global_work_size, local_work_size, 0 , 0, &(e[0]) );	
+	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, global_work_size, local_work_size, 0 , 0, &(e[0]));
+
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 		oclHandles.error_str = "excpetion in _clInvokeKernel() -> ";
@@ -1226,8 +1223,10 @@ void _clInvokeKernel(int kernel_id, int work_items, int work_group_size) throw(s
 		throw(oclHandles.error_str);	
 	}
 	#endif
+
+	printf("before clwaitforevents\n");
 	//_clFinish();
-	oclHandles.cl_status = clWaitForEvents(1, &e[0]);
+	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
 	#ifdef ERRMSG
     if (oclHandles.cl_status!= CL_SUCCESS){
     	oclHandles.error_str = "excpetion in _clEnqueueNDRange() -> clWaitForEvents ->";
@@ -1284,13 +1283,14 @@ void _clMemset(cl_mem mem_d, short val, int number_bytes)throw(string){
 	_clSetArgs(kernel_id, arg_idx++, &number_bytes, sizeof(int));	
 	cl_uint work_dim = WORK_DIM;
 	int work_items = number_bytes;
-	cl_event e[1];
+	cl_event e;
 	if(work_items%work_group_size != 0)	//process situations that work_items cannot be divided by work_group_size
 	  work_items = work_items + (work_group_size-(work_items%work_group_size));
   	size_t local_work_size[] = {work_group_size, 1};
 	size_t global_work_size[] = {work_items, 1};
-	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, \
-											global_work_size, local_work_size, 0 , 0, &(e[0]) );	
+
+	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, global_work_size, local_work_size, 0 , 0, &e);
+
 #ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 		oclHandles.error_str = "excpetion in _clMemset() -> ";
@@ -1345,8 +1345,15 @@ void _clMemset(cl_mem mem_d, short val, int number_bytes)throw(string){
 		throw(oclHandles.error_str);	
 	}
 #endif
+
+
+	printf("before _clFinish();\n");
 	//_clFinish();
-	oclHandles.cl_status = clWaitForEvents(1, &e[0]);
+
+	printf("after _clFinish();\n");
+
+	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
+
 #ifdef ERRMSG
     if (oclHandles.cl_status!= CL_SUCCESS){
     	oclHandles.error_str = "excpetion in _clMemset() -> clWaitForEvents ->";
@@ -1458,7 +1465,7 @@ void _clInvokeKernel2D(int kernel_id, int range_x, int range_y, int group_x, int
 	}
 	#endif
 		
-	oclHandles.cl_status = clWaitForEvents(1, &e[0]);
+	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
 
 #ifdef ERRMSG
     if (oclHandles.cl_status!= CL_SUCCESS){
@@ -1475,7 +1482,7 @@ void _clInvokeKernel2D(int kernel_id, int range_x, int range_y, int group_x, int
 			break;
 		case CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST:
 			oclHandles.error_str += "CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST";
-			break;
+			break;dw
 		case CL_OUT_OF_RESOURCES:
 			oclHandles.error_str += "CL_OUT_OF_RESOURCES";
 			break;

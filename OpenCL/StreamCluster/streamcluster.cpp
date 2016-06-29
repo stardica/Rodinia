@@ -361,7 +361,10 @@ float pFL(Points *points, int *feasible, int numfeasible,
     for (i=0;i<iter;i++) {
 	    x = i%numfeasible;
 	    //printf("--cambine: feasible x=%ld, z=%f, k=%ld, kmax=%d\n", x, z, *k, kmax);
-	    change += pgain(feasible[x], points, z, k, kmax, is_center, center_table, switch_membership,
+
+	    long x = feasible[x];
+
+	    change += pgain(x, points, z, k, kmax, is_center, center_table, switch_membership,
 												&serial, &cpu_gpu_memcpy, &memcpy_back, &gpu_malloc, &kernel);
     }		
     cost -= change;
@@ -822,13 +825,9 @@ void streamCluster( PStream* stream,
     is_center = (bool*)calloc(points.num,sizeof(bool));
     center_table = (int*)malloc(points.num*sizeof(int));
 
-    printf("copy centers\n");
-
     localSearch(&points,kmin, kmax,&kfinal);
 
     fprintf(stderr,"finish local search\n");
-
-    printf("copy centers2\n");
 
     contcenters(&points);
     if( kfinal + centers.num > centersize ) {

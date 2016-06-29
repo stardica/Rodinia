@@ -13,7 +13,7 @@
 ***********************************************/
 
 #define THREADS_PER_BLOCK 256
-#define MAXBLOCKS 65536
+#define MAXBLOCKS 4096
 //#define PROFILE_TMP
 #define __CL_ENABLE_EXCEPTIONS
 #include "CLHelper.h"
@@ -79,8 +79,10 @@ void allocDevMem(int num, int dim, int kmax){
 		quit(&(msg[0]));
 	}	
 }
-float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bool *is_center, int *center_table, char *switch_membership,
+
+float pgain(long x, Points *points, float z, long int *numcenters, int kmax, bool *is_center, int *center_table, char *switch_membership,
 							double *serial, double *cpu_gpu_memcpy, double *memcpy_back, double *gpu_malloc, double *kernel){
+
 	float gl_cost = 0;
 	try{
 #ifdef PROFILE_TMP
@@ -109,9 +111,10 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 #endif
 	coord_h = (float*) malloc( num * dim * sizeof(float));								// coordinates (host)
 	gl_lower = (float*) malloc( kmax * sizeof(float) );
+
 	work_mem_h = (float*)_clMallocHost(kmax*num*sizeof(float));
-	p_h = (Point_Struct*)malloc(num*sizeof(Point_Struct));	//by cambine: not compatibal with original Point
-	
+	p_h = (Point_Struct*)malloc(num*sizeof(Point_Struct));	//by cambine: not compatible with original Point
+
 	// prepare mapping for point coordinates
 	//--cambine: what's the use of point coordinates? for computing distance.
 	for(int i=0; i<dim; i++){
@@ -124,6 +127,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 #endif
 
 	allocDevMem(num, dim, kmax);
+
 #ifdef PROFILE_TMP
 	double t5 = gettime();
 	*gpu_malloc += t5 - t4;
@@ -131,6 +135,8 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 		
 	// copy coordinate to device memory	
 	_clMemcpyH2D(coord_d, coord_h, num*dim*sizeof(float));		
+
+
 #ifdef PROFILE_TMP
 	double t6 = gettime();
 	*cpu_gpu_memcpy += t6 - t5;
@@ -157,6 +163,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	/* copy to device memory */
 	_clMemcpyH2D(center_table_d,  center_table, num*sizeof(int));
 	_clMemcpyH2D(p_d,  p_h,  num * sizeof(Point_Struct));
+
 #ifdef PROFILE_TMP
 	double t8 = gettime();
 	*cpu_gpu_memcpy += t8 - t7;
@@ -168,8 +175,10 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 #ifdef PROFILE_TMP
 	double t9 = gettime();
 #endif
+
 	_clMemset(switch_membership_d, 0, num*sizeof(char));
 	_clMemset(work_mem_d, 0, (K+1)*num*sizeof(float));
+
 	//--cambine: set kernel argument
 	int kernel_id = 0;
 	int arg_idx = 0;		
@@ -187,10 +196,14 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	_clSetArgs(kernel_id, arg_idx++, &x, sizeof(long));
 	_clSetArgs(kernel_id, arg_idx++, &K, sizeof(int));
 
-	
 	_clInvokeKernel(kernel_id, num, THREADS_PER_BLOCK); //--cambine: start kernel here
-	_clFinish();
 	
+	printf("before last clfinish\n");
+
+	//_clFinish();
+	
+
+
 	#ifdef PROFILE_TMP
 	double t10 = gettime();
 	*kernel += t10 - t9;
@@ -204,7 +217,9 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	double t11 = gettime();
 	*memcpy_back += t11 - t10;
 #endif
-		
+
+	printf("after last clfinish\n");
+
 	/****** cpu side work *****/
 	int numclose = 0;
 	gl_cost = z;
