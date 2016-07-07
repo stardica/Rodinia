@@ -217,7 +217,7 @@ kernel_gpu_opencl_wrapper(	int xmax,
 	if (error != CL_SUCCESS) 
 		fatal_CL(error, __LINE__);*/
 
-	FILE *filePointer = fopen(kernel_binary, "rb");
+	FILE *filePointer = fopen(KERNEL_PATH, "rb");
 	if (filePointer == NULL)
 	{
 		printf("error opening kernel binary\n");

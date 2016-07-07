@@ -12,10 +12,21 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
+
+#KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/srad/kernel/kernel_gpu_opencl.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/srad/kernel/kernel_gpu_opencl.cl.bin.GPU"'
+
+#IMAGE_FILE_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image.pgm"'
+IMAGE_FILE_VAR='"/home/cgiles/Rodinia_Benchmarks/data/srad/image.pgm"'
+
+#IMAGE_OUTPUT_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image_output.pgm"'
+IMAGE_OUTPUT_VAR='"/home/cgiles/Rodinia_Benchmarks/data/srad/image_output.pgm"'
+
+
 OCL_INC_DIR = -I$(OPENCL_INC)
 OCL_LIB_DIR = -L$(OPENCL_LIB)
 
-C_C = gcc -m32
+C_C = gcc -DKERNEL_PATH=$(KERNEL_PATH_VAR) -DIMAGE_FILE=$(IMAGE_FILE_VAR) -DIMAGE_OUTPUT=$(IMAGE_OUTPUT_VAR) -m32 
 OCL_LIB = -lm2s-opencl
 #OCL_LIB = -lOpenCL
 

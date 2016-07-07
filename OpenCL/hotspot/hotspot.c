@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
 	//size_t sourceSize = strlen(source);
 
 	//get binanry file
-	    FILE *fp = fopen(kernel_binary, "rb");
+	    FILE *fp = fopen(KERNEL_PATH, "rb");
 	        if (fp == NULL)
 	        {
 	        	printf("error opening kernel binary\n");

@@ -141,7 +141,7 @@ int allocate(int n_points, int n_features, int n_clusters, float **feature)
 
 	//star changes star here
 	//get binanry file
-	FILE *fp = fopen(kernel_binary, "rb");
+	FILE *fp = fopen(KERNEL_PATH, "rb");
 	if (fp == NULL)
 	{
 		printf("error opening kernel binary\n");

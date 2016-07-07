@@ -463,7 +463,7 @@ void _clInit(string device_type, int device_id)throw(string){
 
 	//star changes star here
 	//get binanry file
-	FILE *fp = fopen(kernel_binary, "rb");
+	FILE *fp = fopen(KERNEL_PATH, "rb");
 	if (fp == NULL)
 	{
 		printf("error opening kernel binary\n");

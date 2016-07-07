@@ -80,7 +80,7 @@ int main(int argc, char* argv []){
 	image_ori = (fp*)malloc(sizeof(fp) * image_ori_elem);
 
 	printf("Start reading the image\n");
-	read_graphics(image_file, image_ori, image_ori_rows, image_ori_cols, 1);
+	read_graphics(IMAGE_FILE, image_ori, image_ori_rows, image_ori_cols, 1);
 	printf("Finished reading the image\n");
 	
 	Ne = Nr*Nc;
@@ -139,7 +139,7 @@ int main(int argc, char* argv []){
 	time4 = get_time();
 
 	//printf("Writing output image to file");
-	write_graphics(image_output, image, Nr, Nc, 1, 255);
+	write_graphics(IMAGE_OUTPUT, image, Nr, Nc, 1, 255);
 
 	time5 = get_time();
 	free(image_ori);

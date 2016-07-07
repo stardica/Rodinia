@@ -9,7 +9,7 @@
 #define PATHS_H_
 
 
-char KERNEL[] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/lud/lud_kernel.cl.bin.GPU";
+//char KERNEL[] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/lud/lud_kernel.cl.bin.GPU";
 
 
 #endif /* PATHS_H_ */

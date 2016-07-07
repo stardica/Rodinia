@@ -249,7 +249,7 @@ main(	int argc,
 
 		// y
 		for(i=0; i<workload; i++){
-			read_file( y_file,
+			read_file(Y_FILE,
 						y[i][0],
 						EQUATIONS,
 						1,
@@ -258,7 +258,7 @@ main(	int argc,
 
 		// params
 		for(i=0; i<workload; i++){
-			read_file(param_file,
+			read_file(PARAM_FILE,
 						params[i],
 						PARAMETERS,
 						1,

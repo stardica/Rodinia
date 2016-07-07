@@ -87,7 +87,7 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 
 	//changes star here
 	//get binanry file
-	FILE *filePointer = fopen(kernel_binary, "rb");
+	FILE *filePointer = fopen(KERNEL_PATH, "rb");
 	if (filePointer == NULL)
 	{
 		printf("error opening kernel binary\n");

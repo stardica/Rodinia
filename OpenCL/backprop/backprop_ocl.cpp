@@ -127,7 +127,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	
 	//star changes star here
 	//get binanry file
-	FILE *fp = fopen(kernel_binary, "rb");
+	FILE *fp = fopen(KERNEL_PATH, "rb");
 	if (fp == NULL)
 	{
 		printf("error opening kernel binary\n");
@@ -216,8 +216,10 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	syscall(BEGIN_PARALLEL_SECTION);
   
 	//star changed this whole block...
-	/*input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);*/
+
 	/*printf("input_ocl addr 0x%08x net->input_units 0x%08x\n", &input_ocl, net->input_units);*/
+
+	/*input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);*/
 /*x*/	input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), net->input_units, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_ocl\n"); return -1;}
 

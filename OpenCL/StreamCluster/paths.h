@@ -9,7 +9,7 @@
 #define PATHS_H_
 
 
-char kernel_binary[250] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/StreamCluster/streamcluster_kernels.cl.bin.GPU";
+//char kernel_binary[250] = "/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/StreamCluster/streamcluster_kernels.cl.bin.GPU";
 
 
 #endif /* PATHS_H_ */

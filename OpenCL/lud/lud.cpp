@@ -183,7 +183,7 @@ int main (int argc, char *argv[]){
 	//star modified here.
 	cl_program prog;
 
-	prog = CreateProgramFromBinary(context, device_list[0], KERNEL);
+	prog = CreateProgramFromBinary(context, device_list[0], KERNEL_PATH);
 
 	if(err != CL_SUCCESS)
 	{

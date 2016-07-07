@@ -225,7 +225,7 @@ void _clInit()
     //size_t sourceSize[]    = { source_str.length() };
 
     //get binanry file
-    FILE *fp = fopen(kernel_binary, "rb");
+    FILE *fp = fopen(KERNEL_PATH, "rb");
         if (fp == NULL)
         {
         	cerr << "Binanry not opened." << endl;

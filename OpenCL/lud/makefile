@@ -10,11 +10,15 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
+#KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/lud/lud_kernel.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/lud/lud_kernel.cl.bin.GPU"'
+
+
 INC = -I$(OPENCL_INC) -I../common
 LIB = -L$(OPENCL_LIB)
 
 #C compiler
-CC = g++
+CC = g++ -DKERNEL_PATH=$(KERNEL_PATH_VAR)
 CC_FLAGS = -g -O3 -Wall -m32
 
 EXE = lud

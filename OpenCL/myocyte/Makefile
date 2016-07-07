@@ -11,7 +11,17 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
-C_C = gcc -m32
+#KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/myocyte/kernel/myocyte_kernel.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/myocyte/myocyte_kernel.cl.bin.GPU"'
+
+#PARAM_FILE_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/myocyte/params.txt"'
+PARAM_FILE_VAR='"/home/cgiles/Rodinia_Benchmarks/data/myocyte/params.txt"'
+
+#Y_FILE_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/myocyte/y.txt"'
+Y_FILE_VAR='"/home/cgiles/Rodinia_Benchmarks/data/myocyte/y.txt"'
+
+
+C_C = gcc -m32 -DKERNEL_PATH=$(KERNEL_PATH_VAR) -DPARAM_FILE=$(PARAM_FILE_VAR) -DY_FILE=$(Y_FILE_VAR)
 #OCL_LIB = -lOpenCL
 OCL_LIB = -lm2s-opencl
 

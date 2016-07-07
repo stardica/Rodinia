@@ -238,7 +238,7 @@ int main(int argc, char **argv){
 	//star changes start here.
 
 	//get binanry file
-	FILE *fp = fopen(kernel_binary, "rb");
+	FILE *fp = fopen(KERNEL_PATH, "rb");
 	if (fp == NULL)
 	{
 		printf("error opening kernel binary\n");
