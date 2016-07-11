@@ -14,7 +14,7 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 
 
 #KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/srad/kernel/kernel_gpu_opencl.cl.bin.GPU"'
-KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/srad/kernel/kernel_gpu_opencl.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/srad/kernel_gpu_opencl.cl.bin.GPU"'
 
 #IMAGE_FILE_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/data/srad/image.pgm"'
 IMAGE_FILE_VAR='"/home/cgiles/Rodinia_Benchmarks/data/srad/image.pgm"'

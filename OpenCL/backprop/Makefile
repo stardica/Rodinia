@@ -12,8 +12,8 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/
 
-#KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/backprop/backprop_kernel.cl.bin.GPU"'
-KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/backprop/backprop_kernel.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/backprop/backprop_kernel.cl.bin.GPU"'
+#KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/backprop/backprop_kernel.cl.bin.GPU"'
 
 
 # C compiler
