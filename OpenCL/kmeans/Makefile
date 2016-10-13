@@ -2,9 +2,9 @@
 # M2S_DIR
 # star >> changed here!
 # this is for the m2s runtime
-OPENCL_DIR = /home/stardica/Desktop/runtime
-OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
+OPENCL_DIR = /home/stardica/Dropbox/CDA7919DoctoralResearch/runtime
+OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -23,7 +23,7 @@ all: kmeans
 
 kmeans: cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lOpenCL kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB)
-	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lm2s-opencl kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB) -static -pthread -ldl -lrt
+	$(CC) $(KERNEL_DIM) $(CC_FLAGS) -lm2s-opencl kmeans.cpp cluster.o getopt.o read_input.o kmeans_clustering.o rmse.o -o kmeans -I$(OPENCL_INC) -I$(OPENCL_DIR)/shared/inc/ -L$(OPENCL_LIB) -lm2s-opencl -static -pthread -ldl -lrt
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c
@@ -41,4 +41,4 @@ rmse.o: rmse.c
 	$(CC) $(CC_FLAGS) rmse.c -c -static
 
 clean:
-	rm -f *.o *~ kmeans *.linkinfo
+	rm -f *.o *~ kmeans *.linkinfo *~ kmeans_cl

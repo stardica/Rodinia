@@ -161,8 +161,6 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	//cl_program prog = clCreateProgramWithSource(context, 1, slist, NULL, &err);
 	//if(err != CL_SUCCESS) { printf("ERROR: clCreateProgramWithSource() => %d\n", err); return -1; }
 
-
-
 	err = clBuildProgram(prog, 0, NULL, NULL, NULL, NULL);
 	if(err != CL_SUCCESS) { printf("ERROR: clBuildProgram() => %d\n", err); return -1; }
     	
@@ -316,7 +314,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	clReleaseMemObject(input_prev_weights_ocl);
 
 	syscall(END_PARALLEL_SECTION);
-  
+
 	free(input_weights_prev_one_dim);
 	free(partial_sum);
 	free(input_weights_one_dim);

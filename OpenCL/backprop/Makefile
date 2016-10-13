@@ -2,7 +2,7 @@
 # M2S_DIR
 # star >> changed here!
 # this is for the m2s runtime
-OPENCL_DIR = /home/stardica/Desktop/runtime
+OPENCL_DIR = /home/stardica/Dropbox/CDA7919DoctoralResearch/runtime
 OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/
 OPENCL_LIB = $(OPENCL_DIR)/Release_Static/
 
