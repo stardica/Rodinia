@@ -80,6 +80,8 @@
 
 #include "kmeans.h"
 
+#define CHECK_POINT 327
+
 extern double wtime(void);
 
 int num_omp_threads = 1;
@@ -199,7 +201,10 @@ int main(int argc, char **argv) {
             }
         }
         fclose(infile);
-    }     
+    }
+
+    syscall(CHECK_POINT);
+
 	printf("I/O completed\n");	
 
 	memcpy(attributes[0], buf, numObjects*numAttributes*sizeof(float));

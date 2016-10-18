@@ -18,7 +18,6 @@
 
 #include "paths.h"
 
-
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 
@@ -210,7 +209,6 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem hidden_delta_ocl;
 	cl_mem input_prev_weights_ocl;
 
-
 	syscall(BEGIN_PARALLEL_SECTION);
   
 	//star changed this whole block...
@@ -306,14 +304,13 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
 
 
+	syscall(END_PARALLEL_SECTION);
   
 	clReleaseMemObject(input_ocl);
 	clReleaseMemObject(output_hidden_ocl);
 	clReleaseMemObject(input_hidden_ocl);
 	clReleaseMemObject(hidden_partial_sum);
 	clReleaseMemObject(input_prev_weights_ocl);
-
-	syscall(END_PARALLEL_SECTION);
 
 	free(input_weights_prev_one_dim);
 	free(partial_sum);

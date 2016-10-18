@@ -39,4 +39,4 @@ imagenet.o: imagenet.c
 	$(CC) $(CC_FLAGS) imagenet.c -c -static
 
 clean:
-	rm -f *.o *~ backprop_ocl *.linkinfo
+	rm -f *.o *~ backprop_ocl *.linkinfo *.out
