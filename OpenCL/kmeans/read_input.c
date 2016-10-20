@@ -82,7 +82,7 @@
 
 extern double wtime(void);
 
-
+#define CHECK_POINT 327
 
 /*---< usage() >------------------------------------------------------------*/
 void usage(char *argv0) {
@@ -232,6 +232,7 @@ int setup(int argc, char **argv) {
 	memcpy(features[0], buf, npoints*nfeatures*sizeof(float)); /* now features holds 2-dimensional array of features */
 	free(buf);
 
+	syscall(CHECK_POINT);
 	/* ======================= core of the clustering ===================*/
 
     //cluster_timing = omp_get_wtime();		/* Total clustering time */
