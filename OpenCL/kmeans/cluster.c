@@ -81,7 +81,8 @@ extern double wtime(void);
 /*---< cluster() >-----------------------------------------------------------*/
 int cluster(int      npoints,				/* number of data points */
             int      nfeatures,				/* number of attributes for each point */
-            float  **features,			/* array: [npoints][nfeatures] */                  
+            float  **features,			/* array: [npoints][nfeatures] */
+			float  **swap,
             int      min_nclusters,			/* range of min to max number of clusters */
 			int		 max_nclusters,
             float    threshold,				/* loop terminating factor */
@@ -90,8 +91,9 @@ int cluster(int      npoints,				/* number of data points */
 			float	*min_rmse,				/* out: minimum RMSE */
 			int		 isRMSE,				/* calculate RMSE */
 			int		 nloops					/* number of iteration for each number of clusters */
-			)
-{    
+			){
+
+
 	int		nclusters;						/* number of clusters k */	
 	int		index =0;						/* number of iteration to reach the best RMSE */
 	int		rmse;							/* RMSE for each clustering */
@@ -108,23 +110,27 @@ int cluster(int      npoints,				/* number of data points */
 		if (nclusters > npoints) break;	/* cannot have more clusters than points */
 
 		/* allocate device memory, invert data array (@ kmeans_cuda.cu) */
-		allocate(npoints, nfeatures, nclusters, features);
+		/*allocate(npoints, nfeatures, nclusters, features);*/
 
 		/* iterate nloops times for each number of clusters */
 		for(i = 0; i < nloops; i++)
 		{
+
 			/* initialize initial cluster centers, CUDA calls (@ kmeans_cuda.cu) */
 			tmp_cluster_centres = kmeans_clustering(features,
+													swap,
 													nfeatures,
 													npoints,
 													nclusters,
 													threshold,
 													membership);
 
-			if (*cluster_centres) {
+			if (*cluster_centres)
+			{
 				free((*cluster_centres)[0]);
 				free(*cluster_centres);
 			}
+
 			*cluster_centres = tmp_cluster_centres;
 	        
 					
@@ -137,7 +143,8 @@ int cluster(int      npoints,				/* number of data points */
 							   tmp_cluster_centres,
 							   nclusters);
 				
-				if(rmse < min_rmse_ref){
+				if(rmse < min_rmse_ref)
+				{
 					min_rmse_ref = rmse;			//update reference min RMSE
 					*min_rmse = min_rmse_ref;		//update return min RMSE
 					*best_nclusters = nclusters;	//update optimum number of clusters

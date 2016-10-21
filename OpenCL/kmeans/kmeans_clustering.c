@@ -78,12 +78,14 @@ extern double wtime(void);
 
 /*----< kmeans_clustering() >---------------------------------------------*/
 float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
+						  float **swap,
                           int     nfeatures,
                           int     npoints,
                           int     nclusters,
                           float   threshold,
                           int    *membership) /* out: [npoints] */
 {    
+
     int      i, j, n = 0;				/* counters */
 	int		 loop=0, temp;
     int     *new_centers_len;	/* [nclusters]: no. of points in each cluster */
@@ -146,6 +148,10 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
         new_centers[i] = new_centers[i-1] + nfeatures;
 
 	/* iterate until convergence */
+
+    //star moved this here
+    /* allocate device memory, invert data array (@ kmeans_cuda.cu) */
+	allocate(npoints, nfeatures, nclusters, feature, swap, clusters);
 
     syscall(BEGIN_PARALLEL_SECTION);
 

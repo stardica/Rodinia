@@ -121,7 +121,7 @@ static int shutdown()
 	return 0;
 }
 
-int allocate(int n_points, int n_features, int n_clusters, float **feature)
+int allocate(int n_points, int n_features, int n_clusters, float **feature, float **swap, float  **clusters)
 {
 
 	int sourcesize = 1024*1024;
@@ -185,18 +185,29 @@ int allocate(int n_points, int n_features, int n_clusters, float **feature)
 		
 	kernel_s = clCreateKernel(prog, kernel_kmeans_c, &err);  
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
+
 	kernel2 = clCreateKernel(prog, kernel_swap, &err);  
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
 		
 	clReleaseProgram(prog);
 
-	d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);
+	//star moved malloc up to get the memory location before alloc on gpu...
+	membership_OCL = (int*) malloc(n_points * sizeof(int));
+
+	//d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);
+/*x*/ d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), feature[0], &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature (size:%d) => %d\n", n_points * n_features, err); return -1;}
-	d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);
+
+	/*d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);*/
+/*x*/ d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), swap[0], &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature_swap (size:%d) => %d\n", n_points * n_features, err); return -1;}
-	d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), NULL, &err, CL_TRUE);
+
+	/*d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), NULL, &err, CL_TRUE);*/
+/*x*/ d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), clusters[0], &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_cluster (size:%d) => %d\n", n_clusters * n_features, err); return -1;}
-	d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), NULL, &err, CL_TRUE);
+
+	/*d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), NULL, &err, CL_TRUE);*/
+/*x*/d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), membership_OCL, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_membership (size:%d) => %d\n", n_points, err); return -1;}
 		
 	//write buffers
@@ -217,7 +228,8 @@ int allocate(int n_points, int n_features, int n_clusters, float **feature)
 	err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 1, NULL, global_work, &local_work_size, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 	
-	membership_OCL = (int*) malloc(n_points * sizeof(int));
+	//star moved up!
+	/*membership_OCL = (int*) malloc(n_points * sizeof(int));*/
 }
 
 void deallocateMemory()

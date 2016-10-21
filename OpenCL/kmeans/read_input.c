@@ -102,8 +102,9 @@ void usage(char *argv0) {
 
 /*---< main() >-------------------------------------------------------------*/
 int setup(int argc, char **argv) {
+
 		int		opt;
- extern char   *optarg;
+		extern char   *optarg;
 		char   *filename = 0;
 		float  *buf;
 		char	line[1024];
@@ -117,6 +118,7 @@ int setup(int argc, char **argv) {
 		int		npoints = 0;
 		float	len;
 		         
+		float **swap;
 		float **features;
 		float **cluster_centres=NULL;
 		int		i, j, index;
@@ -155,6 +157,12 @@ int setup(int argc, char **argv) {
     }
 
     if (filename == 0) usage(argv[0]);
+
+    if(nloops > 1)
+    {
+    	printf("nloops > 1\n");
+    	exit(0);
+    }
 		
 	/* ============== I/O begin ==============*/
     /* get nfeatures and npoints */
@@ -201,6 +209,11 @@ int setup(int argc, char **argv) {
         buf         = (float*) malloc(npoints*nfeatures*sizeof(float));
         features    = (float**)malloc(npoints*          sizeof(float*));
         features[0] = (float*) malloc(npoints*nfeatures*sizeof(float));
+
+        //star added this...
+        swap    = (float**)malloc(npoints*          sizeof(float*));
+        swap[0] = (float*) malloc(npoints*nfeatures*sizeof(float));
+
         for (i=1; i<npoints; i++)
             features[i] = features[i-1] + nfeatures;
         rewind(infile);
@@ -240,6 +253,7 @@ int setup(int argc, char **argv) {
     index = cluster(npoints,				/* number of data points */
 					nfeatures,				/* number of features for each point */
 					features,				/* array: [npoints][nfeatures] */
+					swap,
 					min_nclusters,			/* range of min to max number of clusters */
 					max_nclusters,
 					threshold,				/* loop termination factor */
