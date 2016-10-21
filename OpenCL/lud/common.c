@@ -202,7 +202,6 @@ void print_matrix(float *m, int matrix_dim) {
 // Generate well-conditioned matrix internally  by Ke Wang 2013/08/07 22:20:06
 func_ret_t create_matrix(float **mp, int size){
 
-  printf("in create_matrix\n");
   float *m;
   int i,j;
   float lamda = -0.001;

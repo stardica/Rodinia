@@ -40,6 +40,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 
 static int do_verify = 0;
@@ -166,6 +167,8 @@ int main (int argc, char *argv[]){
 	//	return -1;
 	//}
 
+	syscall(CHECK_POINT);
+
 	char *kernel_lud_diag   = "lud_diagonal";
 	char *kernel_lud_peri   = "lud_perimeter";
 	char *kernel_lud_inter  = "lud_internal";
@@ -205,7 +208,8 @@ int main (int argc, char *argv[]){
 
 	if(err != CL_SUCCESS)
 	{
-		printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1;
+		printf("ERROR: clCreateKernel() 0 => %d\n", err);
+		return -1;
 	}
 
 	clReleaseProgram(prog);
@@ -216,14 +220,18 @@ int main (int argc, char *argv[]){
 	//star added this
 	float * star_temp = (float*) malloc(sizeof(float)*matrix_dim*matrix_dim);
 	cl_mem d_star_temp;
-	d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);
-
 	cl_mem d_m;
-	d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);
+
+	/*d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);*/
+/*x*/d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), star_temp, &err, CL_TRUE);
+
+	/*d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);*/
+	d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), m, &err, CL_TRUE);
 	
 	if(err != CL_SUCCESS)
 	{
-		printf("ERROR: clCreateBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err); return -1;
+		printf("ERROR: clCreateBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
+		return -1;
 	}
 
 	/* beginning of timing point */
@@ -232,9 +240,11 @@ int main (int argc, char *argv[]){
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	err = clEnqueueWriteBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
+
 	if(err != CL_SUCCESS)
 	{
-		printf("ERROR: clEnqueueWriteBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err); return -1;
+		printf("ERROR: clEnqueueWriteBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
+		return -1;
 	}
 
 	int i=0;
@@ -242,7 +252,6 @@ int main (int argc, char *argv[]){
 	{
 
 		//printf("In for loop\n");
-
 		clSetKernelArg(diagnal, 0, sizeof(void *), (void*) &d_m);
 		clSetKernelArg(diagnal, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
 		clSetKernelArg(diagnal, 2, sizeof(cl_int), (void*) &matrix_dim);
@@ -254,15 +263,19 @@ int main (int argc, char *argv[]){
 		err = clEnqueueNDRangeKernel(cmd_queue, diagnal, 2, NULL, global_work1, local_work1, 0, 0, 0);
 		if(err != CL_SUCCESS)
 		{
-			printf("ERROR: diagnal clEnqueueNDRangeKernel()=>%d failed\n", err); return -1;
+			printf("ERROR: diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);
+			return -1;
 		}
 		
+
 		//star added this
 		err = clEnqueueReadBuffer(cmd_queue, d_star_temp, 1, 0, matrix_dim*matrix_dim*sizeof(float), star_temp, 0, 0, 0);
 		if(err != CL_SUCCESS)
 		{
-			printf("ERROR: clEnqueueReadBuffer()=>%d failed\n", err); return -1;
+			printf("ERROR: clEnqueueReadBuffer()=>%d failed\n", err);
+			return -1;
 		}
+
 		//printf("\n");	
 		//print_matrix(star_temp, matrix_dim);
 		
@@ -282,8 +295,10 @@ int main (int argc, char *argv[]){
 		err = clEnqueueNDRangeKernel(cmd_queue, perimeter, 2, NULL, global_work2, local_work2, 0, 0, 0);
 		if(err != CL_SUCCESS)
 		{
-			printf("ERROR:  perimeter clEnqueueNDRangeKernel()=>%d failed\n", err); return -1;
+			printf("ERROR:  perimeter clEnqueueNDRangeKernel()=>%d failed\n", err);
+			return -1;
 		}
+
 		//printf("ND Range 2.\n");
 		//fflush(stdout);
 	  
@@ -301,14 +316,13 @@ int main (int argc, char *argv[]){
 		err = clEnqueueNDRangeKernel(cmd_queue, internal, 2, NULL, global_work3, local_work3, 0, 0, 0);
 		if(err != CL_SUCCESS)
 		{
-			printf("ERROR:  internal clEnqueueNDRangeKernel()=>%d failed\n", err); return -1;
+			printf("ERROR:  internal clEnqueueNDRangeKernel()=>%d failed\n", err);
+			return -1;
 		}
 		//printf("ND Range 3.\n");
 		//fflush(stdout);
 
 	}
-
-	printf("Out of for loop\n");
 
 	clSetKernelArg(diagnal, 0, sizeof(void *), (void*) &d_m);
 	clSetKernelArg(diagnal, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
@@ -320,9 +334,10 @@ int main (int argc, char *argv[]){
 	err = clEnqueueNDRangeKernel(cmd_queue, diagnal, 2, NULL, global_work1, local_work1, 0, 0, 0);
 	if(err != CL_SUCCESS)
 	{
-		printf("ERROR:  diagnal clEnqueueNDRangeKernel()=>%d failed\n", err); return -1;
+		printf("ERROR:  diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);
+		return -1;
 	}
-	
+
 
 	//printf("ND Range 4.\n");
 	//fflush(stdout);
@@ -330,15 +345,16 @@ int main (int argc, char *argv[]){
 	err = clEnqueueReadBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
 	if(err != CL_SUCCESS)
 	{
-		printf("ERROR: clEnqueueReadBuffer  d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err); return -1;
+		printf("ERROR: clEnqueueReadBuffer  d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
+		return -1;
 	}
-
-	syscall(END_PARALLEL_SECTION);
 
 	//printf("Read buffer.\n");
 	//fflush(stdout);
 
 	clFinish(cmd_queue);
+
+	syscall(END_PARALLEL_SECTION);
 
 	/* end of timing point */
 	stopwatch_stop(&sw);
@@ -360,7 +376,9 @@ int main (int argc, char *argv[]){
 	free(m);
 	
 	if(shutdown())
+	{
 		return -1;
+	}
 
 	printf("---Done---\n");
 	return 0;
