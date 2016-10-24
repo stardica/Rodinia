@@ -26,6 +26,8 @@
 static int do_verify = 0;
 int omp_num_threads = 0;
 
+#define CHECK_POINT 327
+
 static struct option long_options[] = {
   /* name, has_arg, flag, val */
   {"input", 1, NULL, 'i'},
@@ -112,6 +114,7 @@ int main ( int argc, char *argv[]){
     matrix_duplicate(m, &mm, matrix_dim);
   }
 
+  syscall(CHECK_POINT);
 
   stopwatch_start(&sw);
   lud_omp(m, matrix_dim);

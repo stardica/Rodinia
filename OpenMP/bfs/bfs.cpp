@@ -9,6 +9,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 int no_of_nodes;
 int edge_list_size;
@@ -116,6 +117,8 @@ void BFSGraph( int argc, char** argv)
 		h_cost[i]=-1;
 	h_cost[source]=0;
 	
+
+	syscall(CHECK_POINT);
 	printf("Start traversing the tree\n");
 	
 	int k=0;

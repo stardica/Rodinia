@@ -216,7 +216,9 @@ int setup(int argc, char **argv) {
 
         for (i=1; i<npoints; i++)
             features[i] = features[i-1] + nfeatures;
+
         rewind(infile);
+
         i = 0;
         while (fgets(line, 1024, infile) != NULL) {
             if (strtok(line, " \t\n") == NULL) continue;            

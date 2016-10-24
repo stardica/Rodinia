@@ -203,11 +203,11 @@ int main(int argc, char **argv) {
         fclose(infile);
     }
 
-    syscall(CHECK_POINT);
-
-	printf("I/O completed\n");	
+    printf("I/O completed\n");
 
 	memcpy(attributes[0], buf, numObjects*numAttributes*sizeof(float));
+
+	 syscall(CHECK_POINT);
 
 	timing = omp_get_wtime();
     for (i=0; i<nloops; i++) {
