@@ -27,6 +27,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 
 #ifdef ENABLE_PARSEC_HOOKS
@@ -1163,6 +1164,8 @@ void streamCluster( PStream* stream,
     switch_membership = (bool*)malloc(points.num*sizeof(bool));
     is_center = (bool*)calloc(points.num,sizeof(bool));
     center_table = (int*)malloc(points.num*sizeof(int));
+
+    syscall(CHECK_POINT);
 
 	syscall(BEGIN_PARALLEL_SECTION);
 
