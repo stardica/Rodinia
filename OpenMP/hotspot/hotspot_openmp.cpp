@@ -5,7 +5,7 @@
 #include <unistd.h>
 
 using namespace std;
-#define STR_SIZE	256
+#define STR_SIZE 256
 
 #define VERBOSE
 //#define OUTPUT
@@ -23,6 +23,7 @@ using namespace std;
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 /* chip parameters	*/
 double t_chip = 0.0005;
@@ -234,6 +235,8 @@ int main(int argc, char **argv)
 	pfile = argv[6];
 	read_input(temp, grid_rows, grid_cols, tfile);
 	read_input(power, grid_rows, grid_cols, pfile);
+
+	syscall(CHECK_POINT);
 
 	printf("Start computing the transient temperature\n");
 	syscall(BEGIN_PARALLEL_SECTION);

@@ -9,7 +9,7 @@ extern char *strcpy();
 extern void exit();
 
 #define CHECK_POINT 327
-#define DEBUG_POINT 328
+//#define DEBUG_POINT 328
 
 int layer_size = 0;
 
@@ -20,16 +20,15 @@ void backprop_face()
   float out_err, hid_err;
   net = bpnn_create(layer_size, 16, 1); // (16, 1 can not be changed)
   
-  syscall(CHECK_POINT);
-
   printf("Input layer size : %d\n", layer_size);
   load(net);
   //entering the training kernel, only one iteration
 
+  syscall(CHECK_POINT);
 
   printf("Starting training kernel\n");
   bpnn_train_kernel(net, &out_err, &hid_err);
-  syscall(DEBUG_POINT);
+  //syscall(DEBUG_POINT);
   bpnn_free(net);
   printf("\nFinish the training for one iteration\n");
 

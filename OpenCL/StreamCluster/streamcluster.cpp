@@ -26,6 +26,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 using namespace std;
 
@@ -459,8 +460,7 @@ int selectfeasible_fast(Points *points, int **feasible, int kmin, int pid, pthre
 }
 
 /* compute approximate kmedian on the points */
-float pkmedian(Points *points, long kmin, long kmax, long* kfinal,
-	       int pid, pthread_barrier_t* barrier )
+float pkmedian(Points *points, long kmin, long kmax, long* kfinal, int pid, pthread_barrier_t* barrier )
 {
   int i;
   float cost;
@@ -497,8 +497,7 @@ float pkmedian(Points *points, long kmin, long kmax, long* kfinal,
 
   float myhiz = 0;
   for (long kk=k1;kk < k2; kk++ ) {
-    myhiz += dist(points->p[kk], points->p[0],
-		      ptDimension)*points->p[kk].weight;
+    myhiz += dist(points->p[kk], points->p[0], ptDimension)*points->p[kk].weight;
   }
   hizs[pid] = myhiz;
 
@@ -825,6 +824,10 @@ void streamCluster( PStream* stream,
     is_center = (bool*)calloc(points.num,sizeof(bool));
     center_table = (int*)malloc(points.num*sizeof(int));
 
+    syscall(CHECK_POINT);
+
+    syscall(BEGIN_PARALLEL_SECTION);
+
     localSearch(&points,kmin, kmax,&kfinal);
 
     fprintf(stderr,"finish local search\n");
@@ -856,7 +859,8 @@ void streamCluster( PStream* stream,
     }
   }
 
-  syscall(BEGIN_PARALLEL_SECTION);
+   printf("Out of loop\n");
+   exit(0);
 
   //finally cluster all temp centers
   switch_membership = (char*)malloc(centers.num*sizeof(char));

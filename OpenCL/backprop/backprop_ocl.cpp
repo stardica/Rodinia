@@ -20,6 +20,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +155,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 		printf("error in clCreateProgramWithBinary\n");
 	}
 
+
+
 	// compile kernel
 	//cl_int err = 0;
 	//const char * slist[2] = { source, 0 };
@@ -165,6 +168,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
     	
 	//char * kernel_bp1  = "kernel_bp1";
 	//char * kernel_bp2  = "kernel_bp2";
+
+
 
 	char *kernel_bp1  = strdup("bpnn_layerforward_ocl");
 	char *kernel_bp2  = strdup("bpnn_adjust_weights_ocl");
