@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include <sys/time.h>
+#include <unistd.h>
 
 #ifdef NV //NVIDIA
 	#include <oclUtils.h>
@@ -24,6 +25,10 @@
 #endif
 
 //global variables
+
+#define BEGIN_PARALLEL_SECTION 325
+#define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 #include "paths.h"
 
@@ -208,6 +213,8 @@ int main(int argc, char **argv){
        input_itemsets[j] = -j * penalty;
 	
 	int sourcesize = 1024*1024;
+
+	syscall(CHECK_POINT);
 		
 	//char * source = (char *)calloc(sourcesize, sizeof(char));
 	//if(!source) { printf("ERROR: calloc(%d) failed\n", sourcesize); return -1; }
@@ -298,7 +305,7 @@ int main(int argc, char **argv){
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
 	clReleaseProgram(prog);
 	
-		
+	syscall(BEGIN_PARALLEL_SECTION);
 	
 	// creat buffers
 	cl_mem input_itemsets_d;
@@ -400,7 +407,9 @@ int main(int argc, char **argv){
 	err = clEnqueueReadBuffer(cmd_queue, input_itemsets_d, 1, 0, max_cols * max_rows * sizeof(int), output_itemsets, 0, 0, 0);
 	clFinish(cmd_queue);
 
-#define TRACEBACK	
+	syscall(END_PARALLEL_SECTION);
+
+//#define TRACEBACK
 #ifdef TRACEBACK
 	
 	FILE *fpo = fopen("result.txt","w");

@@ -4,6 +4,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 
 void writeoutput(float *vect, int grid_rows, int grid_cols, char *file) {
@@ -95,7 +96,7 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 	for (t = 0; t < total_iterations; t ++)
 	{
 		
-		printf("Run kernel %d of %d\n", total_iterations, num_iterations);
+		//printf("Run kernel %d of %d\n", total_iterations, num_iterations);
 
 		// Specify kernel arguments
 		int iter = MIN(num_iterations, total_iterations - t);
@@ -154,51 +155,10 @@ int main(int argc, char** argv) {
 
   printf("WG size of kernel = %d X %d\n", BLOCK_SIZE, BLOCK_SIZE);
 
-	cl_int error;
-	cl_uint num_platforms;
-	
-	// Get the number of platforms
-	error = clGetPlatformIDs(0, NULL, &num_platforms);
-    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
-	// Get the list of platforms
-	cl_platform_id* platforms = (cl_platform_id *) malloc(sizeof(cl_platform_id) * num_platforms);
-	error = clGetPlatformIDs(num_platforms, platforms, NULL);
-    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
-	// Print the chosen platform (if there are multiple platforms, choose the first one)
-	cl_platform_id platform = platforms[0];
-	char pbuf[100];
-	error = clGetPlatformInfo(platform, CL_PLATFORM_VENDOR, sizeof(pbuf), pbuf, NULL);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	printf("Platform: %s\n", pbuf);
-	
-	// Create a GPU context
-	cl_context_properties context_properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) platform, 0};
-    context = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_GPU, NULL, NULL, &error);
-    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
-	// Get and print the chosen device (if there are multiple devices, choose the first one)
-	size_t devices_size;
-	error = clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, NULL, &devices_size);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	cl_device_id *devices = (cl_device_id *) malloc(devices_size);
-	error = clGetContextInfo(context, CL_CONTEXT_DEVICES, devices_size, devices, NULL);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	device = devices[0];
-	error = clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(pbuf), pbuf, NULL);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	printf("Device: %s\n", pbuf);
-	
-	// Create a command queue
-	command_queue = clCreateCommandQueue(context, device, 0, &error);
-    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
-	
 
     int size;
     int grid_rows,grid_cols = 0;
-    float *FilesavingTemp,*FilesavingPower; //,*MatrixOut; 
+    float *FilesavingTemp,*FilesavingPower, *swap; //,*MatrixOut;
     char *tfile, *pfile, *ofile;
     
     int total_iterations = 60;
@@ -228,6 +188,11 @@ int main(int argc, char** argv) {
 
     FilesavingTemp = (float *) malloc(size*sizeof(float));
     FilesavingPower = (float *) malloc(size*sizeof(float));
+
+    //star added this for the OCL changes...
+    swap = (float *) malloc(size*sizeof(float));
+
+
     // MatrixOut = (float *) calloc (size, sizeof(float));
 
     if( !FilesavingPower || !FilesavingTemp) // || !MatrixOut)
@@ -240,6 +205,49 @@ int main(int argc, char** argv) {
     readinput(FilesavingPower, grid_rows, grid_cols, pfile);
     printf("finished reading in files\n");
 	
+
+    syscall(CHECK_POINT);
+
+    cl_int error;
+	cl_uint num_platforms;
+
+	// Get the number of platforms
+	error = clGetPlatformIDs(0, NULL, &num_platforms);
+    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+	// Get the list of platforms
+	cl_platform_id* platforms = (cl_platform_id *) malloc(sizeof(cl_platform_id) * num_platforms);
+	error = clGetPlatformIDs(num_platforms, platforms, NULL);
+    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+	// Print the chosen platform (if there are multiple platforms, choose the first one)
+	cl_platform_id platform = platforms[0];
+	char pbuf[100];
+	error = clGetPlatformInfo(platform, CL_PLATFORM_VENDOR, sizeof(pbuf), pbuf, NULL);
+	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	printf("Platform: %s\n", pbuf);
+
+	// Create a GPU context
+	cl_context_properties context_properties[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties) platform, 0};
+    context = clCreateContextFromType(context_properties, CL_DEVICE_TYPE_GPU, NULL, NULL, &error);
+    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+	// Get and print the chosen device (if there are multiple devices, choose the first one)
+	size_t devices_size;
+	error = clGetContextInfo(context, CL_CONTEXT_DEVICES, 0, NULL, &devices_size);
+	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	cl_device_id *devices = (cl_device_id *) malloc(devices_size);
+	error = clGetContextInfo(context, CL_CONTEXT_DEVICES, devices_size, devices, NULL);
+	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	device = devices[0];
+	error = clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(pbuf), pbuf, NULL);
+	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	printf("Device: %s\n", pbuf);
+
+	// Create a command queue
+	command_queue = clCreateCommandQueue(context, device, 0, &error);
+    if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
     //star chagnes start here
     	// Load kernel source from file
 	//const char *source = load_kernel_source("/home/stardica/Desktop/m2sRodiniaBenchmarks/Rodinia/OpenCL/HotSpot/Release/hotspot_kernel.cl");
@@ -305,7 +313,7 @@ int main(int argc, char** argv) {
     	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
 		
-    printf("program and kernel created\n");
+    //printf("program and kernel created\n");
 	//getchar();
 
 	long long start_time = get_time();
@@ -319,21 +327,22 @@ int main(int argc, char** argv) {
 	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error, CL_TRUE);
+	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, swap, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
 	// Copy the power input data
 	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
-	printf("buffers created\n");
+	//printf("buffers created\n");
 	//getchar();
 	
 	// Perform the computation
 	int ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows, total_iterations, pyramid_height,
 				    blockCols, blockRows, borderCols, borderRows, FilesavingTemp, FilesavingPower);
 	
-	printf("clEnqueueMapBuffer\n");
+	//printf("clEnqueueMapBuffer\n");
+
 	// Copy final temperature data back
 	cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
@@ -341,13 +350,19 @@ int main(int argc, char** argv) {
 	long long end_time = get_time();	
 	printf("Total time: %.3f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
 	
+
+	syscall(END_PARALLEL_SECTION);
+
+//#define OUTPUT
+#ifdef OUTPUT
 	// Write final output to output file
     writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
     
+#endif
+
 	error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	syscall(END_PARALLEL_SECTION);
 
 	clReleaseMemObject(MatrixTemp[0]);
 	clReleaseMemObject(MatrixTemp[1]);

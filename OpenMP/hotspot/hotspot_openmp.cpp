@@ -239,9 +239,13 @@ int main(int argc, char **argv)
 	syscall(CHECK_POINT);
 
 	printf("Start computing the transient temperature\n");
+
 	syscall(BEGIN_PARALLEL_SECTION);
+
 	compute_tran_temp(result,sim_time, temp, power, grid_rows, grid_cols);
+
 	syscall(END_PARALLEL_SECTION);
+
 	printf("Ending simulation\n");
 	/* output results	*/
 #ifdef VERBOSE

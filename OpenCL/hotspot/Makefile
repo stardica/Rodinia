@@ -1,7 +1,7 @@
 #include ../../common/make.config
-OPENCL_DIR = /home/stardica/Desktop/runtime
-OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
+OPENCL_DIR = /home/stardica/Dropbox/CDA7919DoctoralResearch/runtime
+OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -9,15 +9,15 @@ OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
 #OPENCL_INC = $(OPENCL_DIR)/include/ 
 #OPENCL_LIB = $(OPENCL_DIR)/lib/x86/ -lOpenCL
 
-#KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/hotspot/hotspot_kernel.cl.bin.GPU"'
-KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/hotspot/hotspot_kernel.cl.bin.GPU"'
+KERNEL_PATH_VAR='"/home/stardica/Dropbox/CDA7919DoctoralResearch/Rodinia_Benchmarks/OpenCL/hotspot/hotspot_kernel.cl.bin.GPU"'
+#KERNEL_PATH_VAR='"/home/cgiles/Rodinia_Benchmarks/OpenCL/hotspot/hotspot_kernel.cl.bin.GPU"'
 
 CC = gcc -DKERNEL_PATH=$(KERNEL_PATH_VAR)
 CC_FLAGS = -g -O2 -Wall -m32
 
-EXE = hotspot
+EXE = hotspot_cl
 
-all: hotspot
+all: hotspot_cl
 
 $(EXE): hotspot.c hotspot.h OpenCL_helper_library.c OpenCL_helper_library.h
 	#$(CC) $(KERNEL_DIM) $(CC_FLAGS) -o $(EXE) -I$(OPENCL_INC) OpenCL_helper_library.c hotspot.c -L$(OPENCL_LIB) -lOpenCL

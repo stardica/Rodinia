@@ -11,6 +11,8 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
+
 
 //#define NUM_THREAD 4
 
@@ -151,7 +153,7 @@ runTest( int argc, char** argv) {
 	for( int j = 1; j< max_cols ; j++)
        input_itemsets[j] = -j * penalty;
 
-
+	syscall(CHECK_POINT);
 	
 	//Compute top-left matrix 
 	printf("Num of threads: %d\n", omp_num_threads);
@@ -190,7 +192,7 @@ runTest( int argc, char** argv) {
 
 	syscall(END_PARALLEL_SECTION);
 
-#define TRACEBACK
+//#define TRACEBACK
 #ifdef TRACEBACK
 	
 	FILE *fpo = fopen("result.txt","w");

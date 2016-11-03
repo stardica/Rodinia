@@ -105,7 +105,7 @@ all: ./a.out
 			$(OCL_INC_DIR)
 
 clean:
-	rm	./*.o srad\
+	rm	./*.o srad_cl\
 		./kernel/*.o \
 		./util/opencl/*.o \
 		./util/graphics/*.o \
