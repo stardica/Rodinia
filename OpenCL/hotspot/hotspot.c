@@ -91,12 +91,13 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 	local_work_size[1] = BLOCK_SIZE;
 	
 	
-	long long start_time = get_time();	
+	long long start_time = get_time();
+
+
 
 	for (t = 0; t < total_iterations; t ++)
 	{
-		
-		//printf("Run kernel %d of %d\n", total_iterations, num_iterations);
+		printf("Run kernel %d of %d\n", (t + 1), total_iterations);
 
 		// Specify kernel arguments
 		int iter = MIN(num_iterations, total_iterations - t);
@@ -327,7 +328,8 @@ int main(int argc, char** argv) {
 	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, swap, &error, CL_TRUE);
+	//MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+/*x*/MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, swap, &error, CL_TRUE);
 	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
 	// Copy the power input data

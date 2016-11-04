@@ -174,14 +174,15 @@ int main(int argc, char **argv){
 	int *input_itemsets;
 	int *output_itemsets;
 
-	int *temp_items;
+
+	int *temp_itemsets;
 	int *temp_reference;
 	
 	reference = (int *)malloc( max_rows * max_cols * sizeof(int));
    	input_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int));
 	output_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int));
 
-	temp_items  = (int *)malloc(sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1));
+	temp_itemsets  = (int *)malloc(sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1));
 	temp_reference  = (int *)malloc (sizeof(int) * BLOCK_SIZE * BLOCK_SIZE);
 	
 	srand(7);
@@ -315,31 +316,36 @@ int main(int argc, char **argv){
 	cl_mem input_itemsets_l;
 	cl_mem reference_l;
 
-	input_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
+	input_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), input_itemsets, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	reference_d		 = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
+
+	reference_d	= clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), reference, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer reference (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	output_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), NULL, &err, CL_TRUE);
+
+	output_itemsets_d = clCreateBuffer(context, CL_MEM_READ_WRITE, max_cols * max_rows * sizeof(int), output_itemsets, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
 	
 
 	//star added here
-	input_itemsets_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), NULL, &err, CL_TRUE);
+	input_itemsets_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), temp_itemsets, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
-	reference_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, NULL, &err, CL_TRUE);
+
+	reference_l = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, temp_reference, &err, CL_TRUE);
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_item_set (size:%d) => %d\n", max_cols * max_rows, err); return -1;}
 	
 	
 	//write buffers
 	err = clEnqueueWriteBuffer(cmd_queue, input_itemsets_d, 1, 0, max_cols * max_rows * sizeof(int), input_itemsets, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer bufIn1 (size:%d) => %d\n", max_cols * max_rows, err); return -1; }
+
 	err = clEnqueueWriteBuffer(cmd_queue, reference_d, 1, 0, max_cols * max_rows * sizeof(int), reference, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer bufIn2 (size:%d) => %d\n", max_cols * max_rows, err); return -1; }
 		
 
 	//star added here
-	err = clEnqueueWriteBuffer(cmd_queue, input_itemsets_l, 1, 0, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), temp_items, 0, 0, 0);
+	err = clEnqueueWriteBuffer(cmd_queue, input_itemsets_l, 1, 0, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), temp_itemsets, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer bufIn1 (size:%d) => %d\n", max_cols * max_rows, err); return -1; }
+
 	err = clEnqueueWriteBuffer(cmd_queue, reference_l, 1, 0, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, temp_reference, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer bufIn2 (size:%d) => %d\n", max_cols * max_rows, err); return -1; }
 
@@ -389,12 +395,16 @@ int main(int argc, char **argv){
 		if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }			
 	}
 	
-	err = clEnqueueReadBuffer(cmd_queue, input_itemsets_l, 1, 0, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), temp_items, 0, 0, 0);
+	err = clEnqueueReadBuffer(cmd_queue, input_itemsets_l, 1, 0, sizeof(int) * (BLOCK_SIZE + 1) *(BLOCK_SIZE+1), temp_itemsets, 0, 0, 0);
+
 	err = clEnqueueReadBuffer(cmd_queue, reference_l, 1, 0, sizeof(int) * BLOCK_SIZE * BLOCK_SIZE, temp_reference, 0, 0, 0);
+
 	if(err != CL_SUCCESS) { printf("clEnqueueReadBuffer\n"); return -1; }
+
 	clFinish(cmd_queue);
 	
 	printf("Processing lower-right matrix\n");
+
 	for( int blk =  worksize/BLOCK_SIZE - 1  ; blk >= 1 ; blk--){	   
 		global_work[0] = BLOCK_SIZE * blk;
 		local_work[0] =  BLOCK_SIZE;
@@ -402,9 +412,13 @@ int main(int argc, char **argv){
         err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 2, NULL, global_work, local_work, 0, 0, 0);
 		if(err != CL_SUCCESS) { printf("ERROR: 2 clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 	}
+
 	clFinish(cmd_queue);
 	fflush(stdout);
-	err = clEnqueueReadBuffer(cmd_queue, input_itemsets_d, 1, 0, max_cols * max_rows * sizeof(int), output_itemsets, 0, 0, 0);
+
+	//they swapped the input with the output here...
+	err = clEnqueueReadBuffer(cmd_queue, input_itemsets_d, 1, 0, max_cols * max_rows * sizeof(int), input_itemsets, 0, 0, 0);
+
 	clFinish(cmd_queue);
 
 	syscall(END_PARALLEL_SECTION);
