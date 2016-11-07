@@ -8,6 +8,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -49,7 +50,9 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   
   in = net->input_n;
   hid = net->hidden_n;
-  out = net->output_n;   
+  out = net->output_n;
+
+  syscall(CHECK_POINT);
    
   printf("Performing CPU computation\n");
 
