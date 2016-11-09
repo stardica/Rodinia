@@ -207,10 +207,11 @@ int main(int argc, char **argv) {
 
 	memcpy(attributes[0], buf, numObjects*numAttributes*sizeof(float));
 
-	 syscall(CHECK_POINT);
+	syscall(CHECK_POINT);
 
 	timing = omp_get_wtime();
-    for (i=0; i<nloops; i++) {
+    for (i=0; i<nloops; i++)
+    {
         
     	cluster_centres = NULL;
         cluster(numObjects, numAttributes, attributes, nclusters, threshold, &cluster_centres);
