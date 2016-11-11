@@ -1,8 +1,8 @@
 #include ../../common/make.config
 # this is for the m2s runtime
-OPENCL_DIR = /home/stardica/Desktop/runtime
-OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/ 
-OPENCL_LIB = $(OPENCL_DIR)/Release_Static/ -lm2s-opencl
+OPENCL_DIR = /home/stardica/Dropbox/CDA7919DoctoralResearch/runtime
+OPENCL_INC = $(OPENCL_DIR)/src/runtime/include/
+OPENCL_LIB = $(OPENCL_DIR)/Release_Static/
 
 # AMD_DIR
 # this is for the amdapp sdk.
@@ -20,7 +20,7 @@ SRC = bfs.cpp timer.cc
 
 CC_FLAGS = -g -O2 -m32
 
-EXE = bfs
+EXE = bfs_cl
 
 all: release
 

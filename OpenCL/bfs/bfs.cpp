@@ -10,6 +10,7 @@
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+#define CHECK_POINT 327
 
 #ifdef  PROFILING
 #include "timer.h"
@@ -79,6 +80,8 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 	try
 	{
 		//--1 transfer data from host to device
+
+		//star malloc memory
 		_clInit();			
 		d_graph_nodes = _clMalloc(no_of_nodes*sizeof(Node), h_graph_nodes);
 		d_graph_edges = _clMalloc(edge_list_size*sizeof(int), h_graph_edges);
@@ -88,6 +91,9 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 		d_cost = _clMallocRW(no_of_nodes*sizeof(int), h_cost);
 		d_over = _clMallocRW(sizeof(int), &h_over);
 		
+
+		//star write to gpu
+
 		_clMemcpyH2D(d_graph_nodes, no_of_nodes*sizeof(Node), h_graph_nodes);
 		_clMemcpyH2D(d_graph_edges, edge_list_size*sizeof(int), h_graph_edges);	
 		_clMemcpyH2D(d_graph_mask, no_of_nodes*sizeof(int), h_graph_mask);	
@@ -134,6 +140,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 			_clInvokeKernel(kernel_id, no_of_nodes, work_group_size);	
 			//printf("kernel 2\n");		
 			
+			//read buffer
 			_clMemcpyD2H(d_over, sizeof(int), &h_over);
 			//printf("mem copy\n");	
 
@@ -145,7 +152,13 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 		kernel_time = kernel_timer.getTimeInSeconds();
 #endif
 		//--3 transfer data from device to host
+
+		//read buffer
 		_clMemcpyD2H(d_cost,no_of_nodes*sizeof(int), h_cost);
+
+
+		syscall(END_PARALLEL_SECTION);
+
 		//--statistics
 #ifdef	PROFILING
 		std::cout<<"kernel time(s):"<<kernel_time<<std::endl;		
@@ -275,7 +288,9 @@ int main(int argc, char * argv[]){
 			h_cost_ref[i] = -1;
 		}
 		h_cost[source]=0;
-		h_cost_ref[source]=0;		
+		h_cost_ref[source]=0;
+
+		syscall(CHECK_POINT);
 		
 		//---------------------------------------------------------
 		//--gpu entry
@@ -284,7 +299,7 @@ int main(int argc, char * argv[]){
 
 		run_bfs_gpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);	
 		
-		syscall(END_PARALLEL_SECTION);
+		//syscall(END_PARALLEL_SECTION);
 
 		//---------------------------------------------------------
 		//--cpu entry

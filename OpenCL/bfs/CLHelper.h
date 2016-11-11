@@ -635,6 +635,7 @@ void _clSetArgs(int kernel_id, int arg_idx, void * d_mem, int size = 0) throw(st
 		#endif
 	}
 }
+
 void _clFinish() throw(string){
 	oclHandles.cl_status = clFinish(oclHandles.queue);	
 	#ifdef ERRMSG
