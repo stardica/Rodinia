@@ -1,0 +1,15 @@
+si_calc_get_work_groups_per_wavefront_pool(): 128 0 0
+si_calc_get_work_groups_per_wavefront_pool(): wavefronts_per_work_group 2
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_max_wavefronts 5
+si_calc_get_work_groups_per_wavefront_pool(): registers_per_work_group 5
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_num_registers 10
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_local_mem 10
+si_calc_get_work_groups_per_wavefront_pool(): work_groups_per_wavefront_pool 5
+
+si_calc_get_work_groups_per_wavefront_pool(): 1024 0 0
+si_calc_get_work_groups_per_wavefront_pool(): wavefronts_per_work_group 16
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_max_wavefronts 0
+si_calc_get_work_groups_per_wavefront_pool(): registers_per_work_group 0
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_num_registers 10
+si_calc_get_work_groups_per_wavefront_pool(): max_work_groups_limitted_by_local_mem 10
+si_calc_get_work_groups_per_wavefront_pool(): work_groups_per_wavefront_pool 0

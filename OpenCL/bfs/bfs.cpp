@@ -76,6 +76,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 	//int number_elements = height*width;
 	//char h_over;
 	int h_over;
+
 	cl_mem d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_cost, d_over;
 	try
 	{
@@ -164,14 +165,14 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 		std::cout<<"kernel time(s):"<<kernel_time<<std::endl;		
 #endif
 		//--4 release cl resources.
-		_clFree(d_graph_nodes);
+		/*_clFree(d_graph_nodes);
 		_clFree(d_graph_edges);
 		_clFree(d_graph_mask);
 		_clFree(d_updating_graph_mask);
 		_clFree(d_graph_visited);
 		_clFree(d_cost);
 		_clFree(d_over);
-		_clRelease();
+		_clRelease();*/
 	}
 	catch(std::string msg){		
 		_clFree(d_graph_nodes);
@@ -270,7 +271,9 @@ int main(int argc, char * argv[]){
 		fscanf(fp,"%d",&edge_list_size);
    		
 		int id,cost;
+
 		int* h_graph_edges = (int*) malloc(sizeof(int)*edge_list_size);
+
 		for(int i=0; i < edge_list_size ; i++){
 			fscanf(fp,"%d",&id);
 			fscanf(fp,"%d",&cost);
@@ -282,6 +285,7 @@ int main(int argc, char * argv[]){
 		
 		// allocate mem for the result on host side
 		int *h_cost = (int*) malloc(sizeof(int)*no_of_nodes);
+
 		int *h_cost_ref = (int*)malloc(sizeof(int)*no_of_nodes);
 		for(int i=0;i<no_of_nodes;i++){
 			h_cost[i]=-1;
@@ -301,6 +305,8 @@ int main(int argc, char * argv[]){
 		
 		//syscall(END_PARALLEL_SECTION);
 
+		printf("running on CPU\n");
+
 		//---------------------------------------------------------
 		//--cpu entry
 		// initalize the memory again
@@ -316,6 +322,9 @@ int main(int argc, char * argv[]){
 		run_bfs_cpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost_ref);
 		//---------------------------------------------------------
 		//--result varification
+
+		printf("checking results\n");
+
 		compare_results<int>(h_cost_ref, h_cost, no_of_nodes);
 		//release host memory		
 		free(h_graph_nodes);
