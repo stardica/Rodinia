@@ -117,8 +117,11 @@ int main ( int argc, char *argv[]){
   syscall(CHECK_POINT);
 
   stopwatch_start(&sw);
+
   lud_omp(m, matrix_dim);
+
   stopwatch_stop(&sw);
+
   printf("Time consumed(ms): %lf\n", 1000*get_interval_by_sec(&sw));
 
   if (do_verify){
