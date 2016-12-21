@@ -6,13 +6,13 @@
 
 #define ETA 0.3      //eta value
 #define MOMENTUM 0.3 //momentum value
-#define NUM_THREAD 8 //OpenMP threads
+#define NUM_THREAD 1 //OpenMP threads
 
 
 typedef struct {
-  int input_n;                  /* number of input units */
-  int hidden_n;                 /* number of hidden units */
-  int output_n;                 /* number of output units */
+  int input_n;                 /* number of input units */
+  int hidden_n;                /* number of hidden units */
+  int output_n;                /* number of output units */
 
   float *input_units;          /* the input units */
   float *hidden_units;         /* the hidden units */
@@ -26,7 +26,7 @@ typedef struct {
   float **input_weights;       /* weights from input to hidden layer */
   float **hidden_weights;      /* weights from hidden to output layer */
 
-                                /*** The next two are for momentum ***/
+                               /*** The next two are for momentum ***/
   float **input_prev_weights;  /* previous change on input to hidden wgt */
   float **hidden_prev_weights; /* previous change on hidden to output wgt */
 } BPNN;

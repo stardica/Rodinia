@@ -1,1 +1,1 @@
-./backprop 1024
+./backprop_ocl 4192

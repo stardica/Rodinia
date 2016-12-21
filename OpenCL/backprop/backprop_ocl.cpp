@@ -7,6 +7,8 @@
 #include "backprop.h"
 #include <CL/cl.h>
 #include <unistd.h>
+#include "rdtsc.h"
+#include <time.h>
 /*
 
 #ifdef NV //NVIDIA
@@ -22,6 +24,10 @@
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
 
+unsigned long long p_start, p_end;
+
+clock_t start, end;
+double cpu_time_used;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -40,10 +46,13 @@ static int initialize(int use_gpu)
 	// create OpenCL context
 	cl_platform_id platform_id;
 	if (clGetPlatformIDs(1, &platform_id, NULL) != CL_SUCCESS) { printf("ERROR: clGetPlatformIDs(1,*,0) failed\n"); return -1; }
+
 	cl_context_properties ctxprop[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform_id, 0};
+
 	device_type = use_gpu ? CL_DEVICE_TYPE_GPU : CL_DEVICE_TYPE_CPU;
-	context = clCreateContextFromType( ctxprop, device_type, NULL, NULL, NULL );
-	if( !context ) { printf("ERROR: clCreateContextFromType(%s) failed\n", use_gpu ? "GPU" : "CPU"); return -1; }
+
+	context = clCreateContextFromType( ctxprop, CL_DEVICE_TYPE_GPU, NULL, NULL, NULL );
+	if( !context ){ printf("ERROR: clCreateContextFromType(%s) failed\n", use_gpu ? "GPU" : "CPU"); return -1;}
 
 	// get the list of GPUs
 	result = clGetContextInfo( context, CL_CONTEXT_DEVICES, 0, NULL, &size );
@@ -215,35 +224,45 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem input_prev_weights_ocl;
 
 	syscall(BEGIN_PARALLEL_SECTION);
+	p_start = rdtsc();
+	start = clock();
   
 	//star changed this whole block...
 
 	/*printf("input_ocl addr 0x%08x net->input_units 0x%08x\n", &input_ocl, net->input_units);*/
 
-	/*input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);*/
-/*x*/	input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), net->input_units, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_ocl\n"); return -1;}
-
-	/*input_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), NULL, &err );*/
+#if M2S_CGM_OCL_SIM
+	{
+/*x*/   input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), net->input_units, &err, CL_TRUE);
 /*x*/	input_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), input_weights_one_dim, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_hidden_ocl\n"); return -1;}
-
-	/*output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), NULL, &err);*/
-	output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), &output_hidden_ocl, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_hidden_ocl\n"); return -1;}
-
-	/*hidden_partial_sum = clCreateBuffer(context, CL_MEM_READ_WRITE, num_blocks * WIDTH * sizeof(float), NULL, &err);*/
+/*x*/	output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), &output_hidden_ocl, &err, CL_TRUE);
 /*x*/	hidden_partial_sum = clCreateBuffer(context, CL_MEM_READ_WRITE, num_blocks * WIDTH * sizeof(float), partial_sum, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer hidden_partial_sum\n"); return -1;}
-
-	/*hidden_delta_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), NULL, &err);*/
 /*x*/	hidden_delta_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), net->hidden_delta, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer hidden_delta_ocl\n"); return -1;}
-
-	/*input_prev_weights_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), NULL, &err );*/
 /*x*/	input_prev_weights_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), input_weights_prev_one_dim, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_prev_weights_ocl\n"); return -1;}
-		
+
+	}
+#else
+	{
+		input_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_ocl\n"); return -1;}
+
+		input_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), NULL, &err );
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_hidden_ocl\n"); return -1;}
+
+		output_hidden_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer output_hidden_ocl\n"); return -1;}
+
+		hidden_partial_sum = clCreateBuffer(context, CL_MEM_READ_WRITE, num_blocks * WIDTH * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer hidden_partial_sum\n"); return -1;}
+
+		hidden_delta_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (hid + 1) * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer hidden_delta_ocl\n"); return -1;}
+
+		input_prev_weights_ocl = clCreateBuffer(context, CL_MEM_READ_WRITE, (in + 1) * (hid + 1) * sizeof(float), NULL, &err );
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer input_prev_weights_ocl\n"); return -1;}
+	}
+#endif
+
 	printf("Performing GPU computation\n");
 	
 	//write buffers
@@ -309,8 +328,26 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
 
 
+	p_end = rdtsc();
+	end = clock();
+
+	//printf("p_sections start %llu\n", start);
+
+	//printf("p_sections end %llu\n", end);
+
+	unsigned long long p_time = p_end - p_start;
+	printf("p_sections cycles %llu\n", p_time);
+
+	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+	//printf("tick %llu\n", CLOCKS_PER_SEC);
+
+	//printf("cpu_time_used %llu\n", end - start);
+
 	syscall(END_PARALLEL_SECTION);
-  
+
+
+
 	clReleaseMemObject(input_ocl);
 	clReleaseMemObject(output_hidden_ocl);
 	clReleaseMemObject(input_hidden_ocl);

@@ -28,7 +28,7 @@ void backprop_face()
 
   printf("Starting training kernel\n");
   bpnn_train_kernel(net, &out_err, &hid_err);
-  //syscall(DEBUG_POINT);
+
   bpnn_free(net);
   printf("\nFinish the training for one iteration\n");
 
