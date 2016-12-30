@@ -63,7 +63,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   //simulator start stats collection
   syscall(BEGIN_PARALLEL_SECTION);
 
-  p_start = rdtsc();
+  //p_start = rdtsc();
 
   bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
   bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);
@@ -74,10 +74,10 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 
   //simulator stop stats collection
 
-  p_end = rdtsc();
+  //p_end = rdtsc();
 
- unsigned long long p_time = p_end - p_start;
- printf("p_sections cycles %llu\n", p_time);
+ //unsigned long long p_time = p_end - p_start;
+ //printf("p_sections cycles %llu\n", p_time);
 
   syscall(END_PARALLEL_SECTION);
 

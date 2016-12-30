@@ -224,8 +224,8 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem input_prev_weights_ocl;
 
 	syscall(BEGIN_PARALLEL_SECTION);
-	p_start = rdtsc();
-	start = clock();
+	//p_start = rdtsc();
+	//start = clock();
   
 	//star changed this whole block...
 
@@ -328,17 +328,17 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
 
 
-	p_end = rdtsc();
-	end = clock();
+	//p_end = rdtsc();
+	//end = clock();
 
 	//printf("p_sections start %llu\n", start);
 
 	//printf("p_sections end %llu\n", end);
 
-	unsigned long long p_time = p_end - p_start;
-	printf("p_sections cycles %llu\n", p_time);
+	//unsigned long long p_time = p_end - p_start;
+	//printf("p_sections cycles %llu\n", p_time);
 
-	cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+	//cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
 
 	//printf("tick %llu\n", CLOCKS_PER_SEC);
 
