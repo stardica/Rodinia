@@ -1,4 +1,4 @@
-SIMULATOR = 0
+SIMULATOR = 1
 MEASURE = 1
 
 #include ../../common/make.config
