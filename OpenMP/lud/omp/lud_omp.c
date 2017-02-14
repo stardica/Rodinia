@@ -2,8 +2,12 @@
 #include <omp.h>
 #include <unistd.h>
 
+#include "rdtsc.h"
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+
+unsigned long long p_start, p_end;
 
 extern int omp_num_threads;
 
@@ -15,6 +19,7 @@ void lud_omp(float *a, int size)
      printf("num of threads = %d\n", omp_num_threads);
      
      //simulator start stats collection
+     p_start = rdtsc();
      syscall(BEGIN_PARALLEL_SECTION);
 
      for (i=0; i <size; i++)
@@ -49,4 +54,7 @@ void lud_omp(float *a, int size)
 
      //simulator end stats collection
      syscall(END_PARALLEL_SECTION);
+     p_end = rdtsc();
+
+     printf("Parallel Section Cycles %llu\n", p_end - p_start);
 }

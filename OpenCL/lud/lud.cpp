@@ -28,6 +28,10 @@
 #include <string>
 #include <unistd.h>
 
+#include "rdtsc.h"
+
+unsigned long long p_start, p_end;
+
 #ifdef RD_WG_SIZE_0_0
 #define BLOCK_SIZE RD_WG_SIZE_0_0
 #elif defined(RD_WG_SIZE_0)
@@ -222,12 +226,19 @@ int main (int argc, char *argv[]){
 	cl_mem d_star_temp;
 	cl_mem d_m;
 
-	/*d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);*/
-/*x*/d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), star_temp, &err, CL_TRUE);
+#if M2S_CGM_OCL_SIM
+	{
+		/*x*/d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), star_temp, &err, CL_TRUE);
+		/*x*/d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), m, &err, CL_TRUE);
+	}
+	#else
+	{
+		d_star_temp = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err);
+		d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err);
+	}
+#endif
 
-	/*d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), NULL, &err, CL_TRUE);*/
-	d_m = clCreateBuffer(context, CL_MEM_READ_WRITE, matrix_dim*matrix_dim * sizeof(float), m, &err, CL_TRUE);
-	
+
 	if(err != CL_SUCCESS)
 	{
 		printf("ERROR: clCreateBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
@@ -237,6 +248,7 @@ int main (int argc, char *argv[]){
 	/* beginning of timing point */
 	stopwatch_start(&sw);
 
+	p_start = rdtsc();
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	err = clEnqueueWriteBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
@@ -355,6 +367,9 @@ int main (int argc, char *argv[]){
 	clFinish(cmd_queue);
 
 	syscall(END_PARALLEL_SECTION);
+	p_end = rdtsc();
+
+	printf("Parallel Section Cycles %llu\n", p_end - p_start);
 
 	/* end of timing point */
 	stopwatch_stop(&sw);

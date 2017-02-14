@@ -1,11 +1,14 @@
+#define _GNU_SOURCE
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <sys/time.h>
 
-#include "backprop.h"
+#include <sched.h>
 
+#include "backprop.h"
 #include "rdtsc.h"
 
 #define BEGIN_PARALLEL_SECTION 325
@@ -13,6 +16,17 @@
 #define CHECK_POINT 327
 
 unsigned long long p_start, p_end;
+
+cpu_set_t  mask;
+
+inline void assignToThisCore(int core_id)
+{
+    CPU_ZERO(&mask);
+    CPU_SET(core_id, &mask);
+    sched_setaffinity(0, sizeof(mask), &mask);
+}
+
+
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -43,7 +57,10 @@ double gettime() {
 int
 main( int argc, char** argv) 
 {
+	//assignToThisCore(0);//assign to core 0,1,2,...
+
 	setup(argc, argv);
+
 }
 
 
@@ -61,6 +78,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   printf("Performing CPU computation\n");
 
   //simulator start stats collection
+  p_start = rdtsc();
   syscall(BEGIN_PARALLEL_SECTION);
 
   bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
@@ -71,5 +89,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
   bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);
 
   syscall(END_PARALLEL_SECTION);
+  p_end = rdtsc();
+  printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 }

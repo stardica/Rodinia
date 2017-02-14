@@ -223,8 +223,9 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem hidden_delta_ocl;
 	cl_mem input_prev_weights_ocl;
 
+	p_start = rdtsc();
 	syscall(BEGIN_PARALLEL_SECTION);
-	//p_start = rdtsc();
+
 	//start = clock();
   
 	//star changed this whole block...
@@ -328,7 +329,7 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_hidden_ocl\n"); return -1; }
 
 
-	//p_end = rdtsc();
+
 	//end = clock();
 
 	//printf("p_sections start %llu\n", start);
@@ -345,7 +346,9 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	//printf("cpu_time_used %llu\n", end - start);
 
 	syscall(END_PARALLEL_SECTION);
+	p_end = rdtsc();
 
+	printf("Parallel Section Cycles %llu\n", p_end - p_start);
 
 
 	clReleaseMemObject(input_ocl);
