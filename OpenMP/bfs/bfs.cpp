@@ -5,11 +5,16 @@
 #include <omp.h>
 #include <unistd.h>
 //#define NUM_THREAD 4
+
+#include "rdtsc.h"
+
 #define OPEN
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
+
+unsigned long long p_start, p_end;
 
 int no_of_nodes;
 int edge_list_size;
@@ -124,6 +129,7 @@ void BFSGraph( int argc, char** argv)
 	int k=0;
     bool stop;
 
+    p_start = rdtsc();
     syscall(BEGIN_PARALLEL_SECTION);
     
 	do
@@ -165,6 +171,9 @@ void BFSGraph( int argc, char** argv)
 	while(stop);
 
 	syscall(END_PARALLEL_SECTION);
+	p_end = rdtsc();
+
+	printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 	//Store the result into a file
 	FILE *fpo = fopen("result.txt","w");

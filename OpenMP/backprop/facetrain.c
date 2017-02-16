@@ -41,5 +41,4 @@ char *argv[];
   bpnn_initialize(seed);
   backprop_face();
 
-  exit(0);
 }

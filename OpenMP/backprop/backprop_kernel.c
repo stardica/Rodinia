@@ -15,6 +15,8 @@
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
 
+#define ITR 1000
+
 unsigned long long p_start, p_end;
 
 cpu_set_t  mask;
@@ -25,6 +27,9 @@ inline void assignToThisCore(int core_id)
     CPU_SET(core_id, &mask);
     sched_setaffinity(0, sizeof(mask), &mask);
 }
+
+long long ave_p_time = 0;
+long long loop_count = 0;
 
 
 
@@ -59,8 +64,16 @@ main( int argc, char** argv)
 {
 	//assignToThisCore(0);//assign to core 0,1,2,...
 
-	setup(argc, argv);
+	//int i = 0;
 
+	//for(i = 0; i < ITR; i++)
+	//{
+		//loop_count++;
+		//printf("running loop %d\n", i);
+		setup(argc, argv);
+	//}
+
+	return 1;
 }
 
 
@@ -90,6 +103,10 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 
   syscall(END_PARALLEL_SECTION);
   p_end = rdtsc();
+
+  /*running ave = ((old count * old data) + next data) / next count*/
+  //ave_p_time = (((loop_count - 1) * ave_p_time) + (p_end - p_start)) / loop_count;
+  printf("Ave time %llu\n", ave_p_time);
   printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 }

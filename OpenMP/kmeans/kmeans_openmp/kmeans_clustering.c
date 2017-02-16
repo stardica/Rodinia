@@ -66,10 +66,14 @@
 #include "kmeans.h"
 #include <omp.h>
 
+#include "rdtsc.h"
+
 #define RANDOM_MAX 2147483647
 
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
+
+unsigned long long p_start, p_end;
 
 #ifndef FLT_MAX
 #define FLT_MAX 3.40282347e+38
@@ -184,6 +188,7 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
 
 	printf("num of threads = %d\n", num_omp_threads);
 
+	p_start = rdtsc();
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	do {
@@ -243,7 +248,10 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
     } while (delta > threshold && loop++ < 500);
 
 	syscall(END_PARALLEL_SECTION);
-    
+	p_end = rdtsc();
+
+	printf("Parallel Section cycles %llu\n", p_end - p_start);
+
     free(new_centers[0]);
     free(new_centers);
     free(new_centers_len);

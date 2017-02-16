@@ -4,6 +4,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+#include "rdtsc.h"
+
 using namespace std;
 #define STR_SIZE 256
 
@@ -24,6 +26,8 @@ using namespace std;
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
+
+unsigned long long p_start, p_end;
 
 /* chip parameters	*/
 double t_chip = 0.0005;
@@ -153,7 +157,7 @@ void compute_tran_temp(double *result, int num_iterations, double *temp, double 
 	fprintf(stdout, "Rx: %g\tRy: %g\tRz: %g\tCap: %g\n", Rx, Ry, Rz, Cap);
 	#endif
 
-     for (int i = 0; i < num_iterations ; i++)
+    for (int i = 0; i < num_iterations ; i++)
 	{
 		#ifdef VERBOSE
 		fprintf(stdout, "iteration %d\n", i++);
@@ -240,11 +244,15 @@ int main(int argc, char **argv)
 
 	printf("Start computing the transient temperature\n");
 
+	p_start = rdtsc();
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	compute_tran_temp(result,sim_time, temp, power, grid_rows, grid_cols);
 
 	syscall(END_PARALLEL_SECTION);
+	p_end = rdtsc();
+
+	printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 	printf("Ending simulation\n");
 	/* output results	*/
