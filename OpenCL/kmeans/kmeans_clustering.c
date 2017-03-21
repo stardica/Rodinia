@@ -69,6 +69,12 @@
 #include "kmeans.h"
 #include <unistd.h>
 
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
+unsigned long long p_start, p_end, p_time;
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 
@@ -153,7 +159,11 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
     /* allocate device memory, invert data array (@ kmeans_cuda.cu) */
 	allocate(npoints, nfeatures, nclusters, feature, swap, clusters);
 
-    syscall(BEGIN_PARALLEL_SECTION);
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
+
+	syscall(BEGIN_PARALLEL_SECTION);
 
 	do {
         delta = 0.0;
@@ -182,6 +192,13 @@ float** kmeans_clustering(float **feature,    /* in: [npoints][nfeatures] */
     } while ((delta > threshold) && (loop++ < 500));	/* makes sure loop terminates */
 
 	syscall(END_PARALLEL_SECTION);
+
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
+
+	printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
+
 
 	printf("iterated %d times\n", c);
     free(new_centers[0]);

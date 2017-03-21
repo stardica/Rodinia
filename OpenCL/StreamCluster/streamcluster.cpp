@@ -24,9 +24,15 @@
 #include "streamcluster_cl.h"
 #include <unistd.h>
 
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
+
+unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
 
 using namespace std;
 
@@ -361,12 +367,11 @@ float pFL(Points *points, int *feasible, int numfeasible,
 #endif
     for (i=0;i<iter;i++) {
 	    x = i%numfeasible;
-	    //printf("--cambine: feasible x=%ld, z=%f, k=%ld, kmax=%d\n", x, z, *k, kmax);
+	    printf("--cambine: feasible x=%ld, z=%f, k=%ld, kmax=%d\n", x, z, *k, kmax);
 
 	    long x = feasible[x];
 
-	    change += pgain(x, points, z, k, kmax, is_center, center_table, switch_membership,
-												&serial, &cpu_gpu_memcpy, &memcpy_back, &gpu_malloc, &kernel);
+	    change += pgain(x, points, z, k, kmax, is_center, center_table, switch_membership, &serial, &cpu_gpu_memcpy, &memcpy_back, &gpu_malloc, &kernel);
     }		
     cost -= change;
 #ifdef PRINTINFO
@@ -693,10 +698,12 @@ void copycenters(Points *points, Points* centers, long* centerIDs, long offset)
 
 void* localSearchSub(void* arg_) {
   pkmedian_arg_t* arg= (pkmedian_arg_t*)arg_;
+
   pkmedian(arg->points,arg->kmin,arg->kmax,arg->kfinal,arg->pid,arg->barrier);
 
   return NULL;
 }
+
 
 void localSearch( Points* points, long kmin, long kmax, long* kfinal ) {
 #ifdef PROFILE_TMP
@@ -826,6 +833,11 @@ void streamCluster( PStream* stream,
 
     syscall(CHECK_POINT);
 
+
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
+
     syscall(BEGIN_PARALLEL_SECTION);
 
     localSearch(&points,kmin, kmax,&kfinal);
@@ -842,8 +854,6 @@ void streamCluster( PStream* stream,
 #ifdef PRINTINFO
     printf("finish cont center\n");
 #endif
-
-
 
     copycenters(&points, &centers, centerIDs, IDoffset);
     IDoffset += numRead;
@@ -872,10 +882,48 @@ void streamCluster( PStream* stream,
   outcenterIDs( &centers, centerIDs, outfile);
 
   syscall(END_PARALLEL_SECTION);
+
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
+
+	printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
+
 }
 
-int main(int argc, char **argv)
-{
+
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
+
+
+int main(int argc, char **argv){
+
+#if M2S_CGM_OCL_SIM == 0
+	intelPCM_init();
+#endif
+
   char *outfilename = new char[MAXNAMESIZE];
   char *infilename = new char[MAXNAMESIZE];
   long kmin, kmax, n, chunksize, clustersize;
@@ -919,6 +967,7 @@ int main(int argc, char **argv)
   strcpy(outfilename, argv[8]);
   nproc = atoi(argv[9]);
   _clCmdParams(argc, argv);
+
   try{
 	  _clInit(device_type, device_id);
    }
@@ -926,14 +975,17 @@ int main(int argc, char **argv)
    	std::cout<<"exception caught in main function->"<<msg<<std::endl;
    	return -1;
    }
+
   srand48(SEED);
   PStream* stream;
+
   if( n > 0 ) {
     stream = new SimStream(n);
   }
   else {
     stream = new FileStream(infilename);
   }
+
 #ifdef PROFILE_TMP
   double t1 = gettime();
 #endif

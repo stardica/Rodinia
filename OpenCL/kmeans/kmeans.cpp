@@ -5,7 +5,12 @@
 #include <iostream>
 #include <string>
 #include "kmeans.h"
-#include "paths.h"
+
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
+unsigned long long k_start, k_end, k_time;
 
 #ifdef WIN
 	#include <windows.h>
@@ -194,21 +199,36 @@ int allocate(int n_points, int n_features, int n_clusters, float **feature, floa
 	//star moved malloc up to get the memory location before alloc on gpu...
 	membership_OCL = (int*) malloc(n_points * sizeof(int));
 
-	//d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);
-/*x*/ d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), feature[0], &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature (size:%d) => %d\n", n_points * n_features, err); return -1;}
+	#if M2S_CGM_OCL_SIM
+	{
+		/*x*/ d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), feature[0], &err, CL_TRUE);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature (size:%d) => %d\n", n_points * n_features, err); return -1;}
 
-	/*d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err, CL_TRUE);*/
-/*x*/ d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), swap[0], &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature_swap (size:%d) => %d\n", n_points * n_features, err); return -1;}
+		/*x*/ d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), swap[0], &err, CL_TRUE);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature_swap (size:%d) => %d\n", n_points * n_features, err); return -1;}
 
-	/*d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), NULL, &err, CL_TRUE);*/
-/*x*/ d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), clusters[0], &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_cluster (size:%d) => %d\n", n_clusters * n_features, err); return -1;}
+		/*x*/ d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), clusters[0], &err, CL_TRUE);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_cluster (size:%d) => %d\n", n_clusters * n_features, err); return -1;}
 
-	/*d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), NULL, &err, CL_TRUE);*/
-/*x*/d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), membership_OCL, &err, CL_TRUE);
-	if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_membership (size:%d) => %d\n", n_points, err); return -1;}
+		/*x*/d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), membership_OCL, &err, CL_TRUE);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_membership (size:%d) => %d\n", n_points, err); return -1;}
+	}
+	#else
+	{
+		d_feature = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature (size:%d) => %d\n", n_points * n_features, err); return -1;}
+
+		d_feature_swap = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * n_features * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_feature_swap (size:%d) => %d\n", n_points * n_features, err); return -1;}
+
+		d_cluster = clCreateBuffer(context, CL_MEM_READ_WRITE, n_clusters * n_features  * sizeof(float), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_cluster (size:%d) => %d\n", n_clusters * n_features, err); return -1;}
+
+		d_membership = clCreateBuffer(context, CL_MEM_READ_WRITE, n_points * sizeof(int), NULL, &err);
+		if(err != CL_SUCCESS) { printf("ERROR: clCreateBuffer d_membership (size:%d) => %d\n", n_points, err); return -1;}
+	}
+	#endif
+
 		
 	//write buffers
 	err = clEnqueueWriteBuffer(cmd_queue, d_feature, 1, 0, n_points * n_features * sizeof(float), feature[0], 0, 0, 0);
@@ -225,9 +245,18 @@ int allocate(int n_points, int n_features, int n_clusters, float **feature, floa
 	if(global_work[0]%local_work_size !=0)
 	  global_work[0]=(global_work[0]/local_work_size+1)*local_work_size;
 
+	//#if M2S_CGM_OCL_SIM == 0
+	//	k_start = RDTSC();
+	//#endif
+
 	err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 1, NULL, global_work, &local_work_size, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 	
+	clFinish(cmd_queue);
+
+	//#if M2S_CGM_OCL_SIM == 0
+	//	k_time += (RDTSC() - k_start);
+	//#endif
 	//star moved up!
 	/*membership_OCL = (int*) malloc(n_points * sizeof(int));*/
 }
@@ -242,9 +271,38 @@ void deallocateMemory()
 
 }
 
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
 
 int main( int argc, char** argv) 
 {
+
+	#if M2S_CGM_OCL_SIM == 0
+		intelPCM_init();
+	#endif
+
 	printf("WG size of kernel_swap = %d, WG size of kernel_kmeans = %d \n", BLOCK_SIZE, BLOCK_SIZE2);
 
 	setup(argc, argv);
@@ -286,10 +344,18 @@ int	kmeansOCL(float **feature,    /* in: [npoints][nfeatures] */
 	clSetKernelArg(kernel_s, 6, sizeof(cl_int), (void*) &offset);
 	clSetKernelArg(kernel_s, 7, sizeof(cl_int), (void*) &size);
 
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
 	err = clEnqueueNDRangeKernel(cmd_queue, kernel_s, 1, NULL, global_work, &local_work_size, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 
 	clFinish(cmd_queue);
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 
 	err = clEnqueueReadBuffer(cmd_queue, d_membership, 1, 0, n_points * sizeof(int), membership_OCL, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: Memcopy Out\n"); return -1; }

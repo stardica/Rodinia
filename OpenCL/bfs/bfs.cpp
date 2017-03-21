@@ -8,6 +8,12 @@
 #include "bfs.h"
 #include <unistd.h>
 
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
+unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
@@ -78,12 +84,19 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 	int h_over;
 
 	cl_mem d_graph_nodes, d_graph_edges, d_graph_mask, d_updating_graph_mask, d_graph_visited, d_cost, d_over;
+
 	try
 	{
-		//--1 transfer data from host to device
+		_clInit();
 
+		#if M2S_CGM_OCL_SIM == 0
+			p_start = RDTSC();
+		#endif
+
+		syscall(BEGIN_PARALLEL_SECTION);
+
+		//--1 transfer data from host to device
 		//star malloc memory
-		_clInit();			
 		d_graph_nodes = _clMalloc(no_of_nodes*sizeof(Node), h_graph_nodes);
 		d_graph_edges = _clMalloc(edge_list_size*sizeof(int), h_graph_edges);
 		d_graph_mask = _clMallocRW(no_of_nodes*sizeof(int), h_graph_mask);
@@ -148,6 +161,7 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 			}while(h_over);
 			
 		_clFinish();
+
 #ifdef	PROFILING
 		kernel_timer.stop();
 		kernel_time = kernel_timer.getTimeInSeconds();
@@ -157,8 +171,14 @@ void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 		//read buffer
 		_clMemcpyD2H(d_cost,no_of_nodes*sizeof(int), h_cost);
 
-
 		syscall(END_PARALLEL_SECTION);
+
+		#if M2S_CGM_OCL_SIM == 0
+			p_time = (RDTSC() - p_start);
+		#endif
+
+
+		printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
 
 		//--statistics
 #ifdef	PROFILING
@@ -196,12 +216,43 @@ void Usage(int argc, char**argv){
 fprintf(stderr,"Usage: %s <input_file>\n", argv[0]);
 
 }
+
+
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
+
 //----------------------------------------------------------
 //--cambine:	main function
 //--author:	created by Jianbin Fang
 //--date:	25/01/2011
 //----------------------------------------------------------
 int main(int argc, char * argv[]){
+
+	#if M2S_CGM_OCL_SIM == 0
+		intelPCM_init();
+	#endif
 
 	int no_of_nodes;
 	int edge_list_size;
@@ -299,12 +350,11 @@ int main(int argc, char * argv[]){
 		//---------------------------------------------------------
 		//--gpu entry
 
-		syscall(BEGIN_PARALLEL_SECTION);
-
 		run_bfs_gpu(no_of_nodes,h_graph_nodes,edge_list_size,h_graph_edges, h_graph_mask, h_updating_graph_mask, h_graph_visited, h_cost);	
 		
 		//syscall(END_PARALLEL_SECTION);
 
+#ifdef VERIFY
 		printf("running on CPU\n");
 
 		//---------------------------------------------------------
@@ -326,6 +376,8 @@ int main(int argc, char * argv[]){
 		printf("checking results\n");
 
 		compare_results<int>(h_cost_ref, h_cost, no_of_nodes);
+#endif
+
 		//release host memory		
 		free(h_graph_nodes);
 		free(h_graph_mask);
@@ -342,6 +394,6 @@ int main(int argc, char * argv[]){
 		free(h_updating_graph_mask);
 		free(h_graph_visited);		
 	}
-		
+	printf("bfs success\n");
     return 0;
 }

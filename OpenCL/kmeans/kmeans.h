@@ -44,6 +44,8 @@
 #define FLT_MAX 3.40282347e+38
 #endif
 
+extern unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
+
 /* rmse.c */
 float   euclid_dist_2        (float*, float*, int);
 int     find_nearest_point   (float* , int, float**, int);

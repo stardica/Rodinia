@@ -178,6 +178,8 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	int mem_size; // matrix memory size
 	mem_size = sizeof(fp) * Ne; // get the size of float representation of input IMAGE
 
+
+
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	cl_mem d_I;
@@ -286,8 +288,8 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 	error = clEnqueueNDRangeKernel(command_queue, extract_kernel, 1, 0, global_work_size, local_work_size, 0, NULL, NULL);
 	if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
 
-	printf("here_1\n");
-	fflush(stdout);
+	//printf("here_1\n");
+	//fflush(stdout);
 
 	//Synchronization - wait for all operations in the command queue so far to finish
 	
@@ -441,8 +443,6 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 		// Prepare kernel
 		
 
-
-
 		// launch kernel
 		error = clEnqueueNDRangeKernel(command_queue, prepare_kernel, 1, NULL, 	global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) {fatal_CL(error, __LINE__);}
@@ -454,7 +454,7 @@ kernel_gpu_opencl_wrapper(image, Nr, Nc, Ne, niter, lambda, NeROI, iN, iS, jE, j
 		// synchronize
 		// error = clFinish(command_queue);
 		// if (error != CL_SUCCESS) 
-			// fatal_CL(error, __LINE__);
+		// fatal_CL(error, __LINE__);
 
 		
 		//Reduce Kernel - performs subsequent reductions of sums

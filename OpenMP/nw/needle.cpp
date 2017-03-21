@@ -9,7 +9,7 @@
 #include <unistd.h>
 
 #include "rdtsc.h"
-
+#include "cpucounters.h"
 
 #define OPENMP
 
@@ -74,13 +74,39 @@ double gettime() {
   return t.tv_sec+t.tv_usec*1e-6;
 }
 
+//performance monitor
+PCM * m;
+
+CoreCounterState before_sstate, after_sstate;
+
+void intelPCM_init(){
+
+	m = PCM::getInstance();
+
+	m->resetPMU();
+
+	PCM::ErrorCode returnResult = m->program();
+
+	if (returnResult != PCM::Success)
+	{
+		std::cerr << "Intel's PCM couldn't start" << std::endl;
+		std::cerr << "Error code: " << returnResult << std::endl;
+		exit(1);
+	}
+
+	return;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
 int
 main( int argc, char** argv) 
 {
-    runTest( argc, argv);
+
+	intelPCM_init();
+
+	runTest( argc, argv);
 
     return EXIT_SUCCESS;
 }
@@ -165,7 +191,8 @@ runTest( int argc, char** argv) {
 	printf("Num of threads: %d\n", omp_num_threads);
 	printf("Processing top-left matrix\n");
 	
-	p_start = rdtsc();
+	p_start = RDTSC();
+	before_sstate = getCoreCounterState(1);
 	syscall(BEGIN_PARALLEL_SECTION);
 
     for( int i = 0 ; i < max_cols-2 ; i++){
@@ -181,6 +208,7 @@ runTest( int argc, char** argv) {
 
 		}
 	}
+
 	printf("Processing bottom-right matrix\n");
     //Compute bottom-right matrix 
 	for( int i = max_cols - 4 ; i >= 0 ; i--){
@@ -198,9 +226,11 @@ runTest( int argc, char** argv) {
 	}
 
 	syscall(END_PARALLEL_SECTION);
-	p_end = rdtsc();
+	after_sstate = getCoreCounterState(1);
+	p_end = RDTSC();
 
 	printf("Parallel Section cycles %llu\n", p_end - p_start);
+	printf("Parallel Section cycles %llu\n", getCycles(before_sstate, after_sstate));
 
 //#define TRACEBACK
 #ifdef TRACEBACK

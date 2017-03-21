@@ -106,7 +106,7 @@ void bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 
   /*running ave = ((old count * old data) + next data) / next count*/
   //ave_p_time = (((loop_count - 1) * ave_p_time) + (p_end - p_start)) / loop_count;
-  printf("Ave time %llu\n", ave_p_time);
+ // printf("Ave time %llu\n", ave_p_time);
   printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 }

@@ -32,8 +32,8 @@ Point_Struct *p_h;
 /* device memory */
 cl_mem work_mem_d;
 cl_mem coord_d;
-cl_mem  center_table_d;
-cl_mem  switch_membership_d;
+cl_mem center_table_d;
+cl_mem switch_membership_d;
 cl_mem p_d;
 
 static int c;			// counters
@@ -44,6 +44,9 @@ void quit(char *message){
 }
 //free memory
 void freeDevMem(){
+
+	//printf("here\n");
+
 	try{
 	_clFree(work_mem_d);
 	_clFree(center_table_d);
@@ -61,6 +64,7 @@ void freeDevMem(){
 	if(p_h!=NULL)
 		free(p_h);
 	}
+
 	catch(string msg){
 		quit(&(msg[0]));
 	}	
@@ -68,6 +72,11 @@ void freeDevMem(){
 
 //allocate device memory together
 void allocDevMem(int num, int dim, int kmax){
+
+
+	printf("here\n");
+	getchar();
+
 	try{
 		work_mem_d = _clMalloc(kmax * num * sizeof(float));
 		center_table_d = _clMalloc(num * sizeof(int));
@@ -198,8 +207,9 @@ float pgain(long x, Points *points, float z, long int *numcenters, int kmax, boo
 
 	_clInvokeKernel(kernel_id, num, THREADS_PER_BLOCK); //--cambine: start kernel here
 	
-	printf("before last clfinish\n");
+	//printf("before last clfinish\n");
 
+	clFinish(oclHandles.queue);
 	//_clFinish();
 	
 
@@ -218,7 +228,7 @@ float pgain(long x, Points *points, float z, long int *numcenters, int kmax, boo
 	*memcpy_back += t11 - t10;
 #endif
 
-	printf("after last clfinish\n");
+	//printf("after last clfinish\n");
 
 	/****** cpu side work *****/
 	int numclose = 0;

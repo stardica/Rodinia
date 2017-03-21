@@ -7,7 +7,11 @@
 #include "backprop.h"
 #include <CL/cl.h>
 #include <unistd.h>
-#include "rdtsc.h"
+
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
 #include <time.h>
 /*
 
@@ -24,7 +28,7 @@
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
 
-unsigned long long p_start, p_end;
+unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
 
 clock_t start, end;
 double cpu_time_used;
@@ -98,12 +102,43 @@ double gettime() {
 unsigned int num_threads = 0;
 unsigned int num_blocks = 0;
 
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // Program main
 ////////////////////////////////////////////////////////////////////////////////
 int
 main( int argc, char** argv) 
 {
+
+#if M2S_CGM_OCL_SIM == 0
+	intelPCM_init();
+#endif
+
+
 	setup(argc, argv);
 }
 
@@ -223,7 +258,9 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	cl_mem hidden_delta_ocl;
 	cl_mem input_prev_weights_ocl;
 
-	p_start = rdtsc();
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	//start = clock();
@@ -282,8 +319,16 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	clSetKernelArg(kernel1, 6, sizeof(cl_int), (void*) &in);
 	clSetKernelArg(kernel1, 7, sizeof(cl_int), (void*) &hid);
   
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
 	err = clEnqueueNDRangeKernel(cmd_queue, kernel1, 2, NULL, global_work, local_work, 0, 0, 0);
-	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }	
+	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
+
+	clFinish(cmd_queue);
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
   
 	err = clEnqueueReadBuffer(cmd_queue, hidden_partial_sum, 1, 0, num_blocks * WIDTH * sizeof(float), partial_sum, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: partial sum\n"); return -1; }	
@@ -319,8 +364,17 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	clSetKernelArg(kernel2, 4, sizeof(void *), (void*) &input_hidden_ocl);
 	clSetKernelArg(kernel2, 5, sizeof(void *), (void*) &input_prev_weights_ocl );
   
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
 	err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 2, NULL, global_work, local_work, 0, 0, 0);
-	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }	
+	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
+
+	clFinish(cmd_queue);
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
   
 	err = clEnqueueReadBuffer(cmd_queue, input_ocl, 1, 0, (in + 1) * sizeof(float), net->input_units, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }	
@@ -346,9 +400,13 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	//printf("cpu_time_used %llu\n", end - start);
 
 	syscall(END_PARALLEL_SECTION);
-	p_end = rdtsc();
 
-	printf("Parallel Section Cycles %llu\n", p_end - p_start);
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
+
+
+	printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
 
 
 	clReleaseMemObject(input_ocl);

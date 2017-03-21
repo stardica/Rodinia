@@ -2,10 +2,15 @@
 #include "paths.h"
 #include <unistd.h>
 
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
 
+unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
 
 void writeoutput(float *vect, int grid_rows, int grid_cols, char *file) {
 
@@ -37,18 +42,18 @@ void readinput(float *vect, int grid_rows, int grid_cols, char *file) {
 	float val;
 
 	if( (fp  = fopen(file, "r" )) ==0 )
-            fatal( "The file was not opened" );
+            fatal_hotspot( "The file was not opened" );
 
 
 	for (i=0; i <= grid_rows-1; i++) 
 	 for (j=0; j <= grid_cols-1; j++)
 	 {
-		if (fgets(str, STR_SIZE, fp) == NULL) fatal("Error reading file\n");
+		if (fgets(str, STR_SIZE, fp) == NULL) fatal_hotspot("Error reading file\n");
 		if (feof(fp))
-			fatal("not enough lines in file");
+			fatal_hotspot("not enough lines in file");
 		//if ((sscanf(str, "%d%f", &index, &val) != 2) || (index != ((i-1)*(grid_cols-2)+j-1)))
 		if ((sscanf(str, "%f", &val) != 1))
-			fatal("invalid file format");
+			fatal_hotspot("invalid file format");
 		vect[i*grid_cols+j] = val;
 	}
 
@@ -93,8 +98,6 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 	
 	long long start_time = get_time();
 
-
-
 	for (t = 0; t < total_iterations; t ++)
 	{
 		printf("Run kernel %d of %d\n", (t + 1), total_iterations);
@@ -116,20 +119,30 @@ int compute_tran_temp(cl_mem MatrixPower, cl_mem MatrixTemp[2], int col, int row
 		clSetKernelArg(kernel, 12, sizeof(float), (void *) &step);
 		
 		// Launch kernel
+		#if M2S_CGM_OCL_SIM == 0
+			k_start = RDTSC();
+		#endif
 		error = clEnqueueNDRangeKernel(command_queue, kernel, 2, NULL, global_work_size, local_work_size, 0, NULL, NULL);
 		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 		
 		// Flush the queue
 		error = clFlush(command_queue);
 		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+		error = clFinish(command_queue);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+		#if M2S_CGM_OCL_SIM == 0
+			k_time += (RDTSC() - k_start);
+		#endif
 		
+
 		// Swap input and output GPU matrices
 		src = 1 - src;
 		dst = 1 - dst;
 
 		// Wait for all operations to finish
-		error = clFinish(command_queue);
-		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
 	}
 
 	printf("Done running kernels\n");
@@ -152,7 +165,36 @@ void usage(int argc, char **argv) {
 	exit(1);
 }
 
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
+
 int main(int argc, char** argv) {
+
+	#if M2S_CGM_OCL_SIM == 0
+		intelPCM_init();
+	#endif
 
   printf("WG size of kernel = %d X %d\n", BLOCK_SIZE, BLOCK_SIZE);
 
@@ -197,7 +239,7 @@ int main(int argc, char** argv) {
     // MatrixOut = (float *) calloc (size, sizeof(float));
 
     if( !FilesavingPower || !FilesavingTemp) // || !MatrixOut)
-        fatal("unable to allocate memory");
+        fatal_hotspot("unable to allocate memory");
 	
 	// Read input data from disk
     printf("reading input temp file\n");
@@ -319,51 +361,91 @@ int main(int argc, char** argv) {
 
 	long long start_time = get_time();
 	
-	syscall(BEGIN_PARALLEL_SECTION);
-
 	// Create two temperature matrices and copy the temperature input data
 	cl_mem MatrixTemp[2];
+	cl_mem MatrixPower = NULL;
 
-	// Create input memory buffers on device
-	MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error, CL_TRUE);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
+
+	syscall(BEGIN_PARALLEL_SECTION);
+
+	#if M2S_CGM_OCL_SIM
+	{
+		// Create input memory buffers on device
+		MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error, CL_TRUE);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
-	//MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
-/*x*/MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, swap, &error, CL_TRUE);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+		//MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+		/*x*/MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, swap, &error, CL_TRUE);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
-	// Copy the power input data
-	cl_mem MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error, CL_TRUE);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+		// Copy the power input data
+		MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error, CL_TRUE);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	}
+#else
+	{
+		// Create input memory buffers on device
+		MatrixTemp[0] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingTemp, &error);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
-	//printf("buffers created\n");
-	//getchar();
+		MatrixTemp[1] = clCreateBuffer(context, CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR, sizeof(float) * size, NULL, &error);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+
+		// Copy the power input data
+		MatrixPower = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_USE_HOST_PTR, sizeof(float) * size, FilesavingPower, &error);
+		if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	}
+#endif
 	
+	//write buffers
+	error = clEnqueueWriteBuffer(command_queue, MatrixTemp[0], 1, 0, sizeof(float) * size, FilesavingTemp, 0, 0, 0);
+	if(error != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer input_ocl\n"); return -1; }
+
+	//write buffers
+	error = clEnqueueWriteBuffer(command_queue, MatrixTemp[1], 1, 0, sizeof(float) * size, swap, 0, 0, 0);
+	if(error != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer input_ocl\n"); return -1; }
+
+	//write buffers
+	error = clEnqueueWriteBuffer(command_queue, MatrixPower, 1, 0, sizeof(float) * size, FilesavingPower, 0, 0, 0);
+	if(error != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer input_ocl\n"); return -1; }
+
+
 	// Perform the computation
 	int ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows, total_iterations, pyramid_height,
 				    blockCols, blockRows, borderCols, borderRows, FilesavingTemp, FilesavingPower);
 	
-	//printf("clEnqueueMapBuffer\n");
 
 	// Copy final temperature data back
-	cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
-	
-	long long end_time = get_time();	
-	printf("Total time: %.3f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
-	
+	error = clEnqueueReadBuffer(command_queue, MatrixTemp[ret], 1, 0, sizeof(float) * size, FilesavingTemp, 0, 0, 0);
+	if(error != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }
+
+	//cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
+	//if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 
 	syscall(END_PARALLEL_SECTION);
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
 
-//#define OUTPUT
+
+	printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
+
+	long long end_time = get_time();
+	printf("Total time: %.3f seconds\n", ((float) (end_time - start_time)) / (1000*1000));
+
+
+	//#define OUTPUT
 #ifdef OUTPUT
 	// Write final output to output file
     writeoutput(MatrixOut, grid_rows, grid_cols, ofile);
     
 #endif
 
-	error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
-	if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
+	//error = clEnqueueUnmapMemObject(command_queue, MatrixTemp[ret], (void *) MatrixOut, 0, NULL, NULL);
+	//if (error != CL_SUCCESS) fatal_CL(error, __LINE__);
 	
 
 	clReleaseMemObject(MatrixTemp[0]);

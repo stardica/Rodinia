@@ -25,9 +25,13 @@
 #include <omp.h>
 #include <unistd.h>
 
+#include "rdtsc.h"
+
 #define BEGIN_PARALLEL_SECTION 325
 #define END_PARALLEL_SECTION 326
 #define CHECK_POINT 327
+
+unsigned long long p_start, p_end;
 
 
 #ifdef ENABLE_PARSEC_HOOKS
@@ -1167,6 +1171,7 @@ void streamCluster( PStream* stream,
 
     syscall(CHECK_POINT);
 
+    p_start = rdtsc();
 	syscall(BEGIN_PARALLEL_SECTION);
 
     localSearch(&points,kmin, kmax,&kfinal);
@@ -1209,6 +1214,9 @@ void streamCluster( PStream* stream,
   outcenterIDs( &centers, centerIDs, outfile);
 
   syscall(END_PARALLEL_SECTION);
+  p_end = rdtsc();
+
+  printf("Parallel Section cycles %llu\n", p_end - p_start);
 
 }
 

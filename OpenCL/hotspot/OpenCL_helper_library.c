@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <cstdlib>
 #include "OpenCL_helper_library.h"
 
 

@@ -17,7 +17,7 @@
 #include <string>
 #include <sys/time.h>
 #include <unistd.h>
-#include "rdtsc.h"
+#include "cpucounters.h"
 
 #ifdef NV //NVIDIA
 	#include <oclUtils.h>
@@ -150,7 +150,32 @@ double gettime() {
   return t.tv_sec+t.tv_usec*1e-6;
 }
 
+//performance monitor
+PCM * m;
+
+CoreCounterState before_sstate, after_sstate;
+
+void intelPCM_init(){
+
+	m = PCM::getInstance();
+
+	m->resetPMU();
+
+	PCM::ErrorCode returnResult = m->program();
+
+	if (returnResult != PCM::Success)
+	{
+		std::cerr << "Intel's PCM couldn't start" << std::endl;
+		std::cerr << "Error code: " << returnResult << std::endl;
+		exit(1);
+	}
+
+	return;
+}
+
 int main(int argc, char **argv){
+
+  intelPCM_init();
 
   printf("WG size of kernel = %d \n", BLOCK_SIZE);
 
@@ -313,7 +338,7 @@ int main(int argc, char **argv){
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
 	clReleaseProgram(prog);
 	
-	p_start = rdtsc();
+	p_start = RDTSC();
 	syscall(BEGIN_PARALLEL_SECTION);
 	
 	// creat buffers
@@ -437,7 +462,7 @@ int main(int argc, char **argv){
 		local_work[0]  = BLOCK_SIZE;
 		clSetKernelArg(kernel1, 7, sizeof(cl_int), (void*) &blk);
 
-		k_start = rdtsc();
+		k_start = RDTSC();
 		err = clEnqueueNDRangeKernel(cmd_queue, kernel1, 2, NULL, global_work, local_work, 0, 0, 0);
 
 
@@ -452,7 +477,7 @@ int main(int argc, char **argv){
 #endif
 
 	clFinish(cmd_queue);
-	k_time += (rdtsc() - k_start);
+	k_time += (RDTSC() - k_start);
 
 	
 	printf("Processing lower-right matrix\n");
@@ -461,14 +486,14 @@ int main(int argc, char **argv){
 		local_work[0] =  BLOCK_SIZE;
 		clSetKernelArg(kernel2, 7, sizeof(cl_int), (void*) &blk);
 
-		k_start = rdtsc();
+		k_start = RDTSC();
         err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 2, NULL, global_work, local_work, 0, 0, 0);
 
 		if(err != CL_SUCCESS) { printf("ERROR: 2 clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 	}
 
 	clFinish(cmd_queue);
-	k_time += (rdtsc() - k_start);
+	k_time += (RDTSC() - k_start);
 
 	fflush(stdout);
 
@@ -478,7 +503,7 @@ int main(int argc, char **argv){
 	clFinish(cmd_queue);
 
 	syscall(END_PARALLEL_SECTION);
-	p_time = (rdtsc() - p_start);
+	p_time = (RDTSC() - p_start);
 
 	printf("Parallel Section Cycles %llu Kernel cycles %llu\n", p_time, k_time);
 

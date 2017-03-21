@@ -13,6 +13,12 @@
 #include <string>
 #include <sys/time.h>
 
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
+
+extern unsigned long long k_start, k_end, k_time;
+
 
 using std::string;
 using std::ifstream;
@@ -566,9 +572,7 @@ void _clInit(string device_type, int device_id)throw(string){
     for (int nKernel = 0; nKernel < total_kernels; nKernel++)
     {
         // get a kernel object handle for a kernel with the given name 
-        cl_kernel kernel = clCreateKernel(oclHandles.program,
-                                            (kernel_names[nKernel]).c_str(),
-                                            &resultCL);
+        cl_kernel kernel = clCreateKernel(oclHandles.program, (kernel_names[nKernel]).c_str(), &resultCL);
 
         if ((resultCL != CL_SUCCESS) || (kernel == NULL))
         {
@@ -677,7 +681,17 @@ cl_mem _clMalloc(int size) throw(string){
 	double t1 = gettime();
 #endif
  	cl_mem d_mem;
-	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE, size, NULL, &oclHandles.cl_status, CL_TRUE);
+
+#if M2S_CGM_OCL_SIM
+{
+ 	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE, size, NULL, &oclHandles.cl_status, CL_TRUE);
+}
+#else
+{
+	d_mem = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE, size, NULL, &oclHandles.cl_status);
+}
+#endif
+
 #ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 	  oclHandles.error_str = "excpetion in _clMalloc -> ";
@@ -723,7 +737,17 @@ cl_mem _clMalloc(int size) throw(string){
 
 void* _clMallocHost(int size)throw(string){
 	void * mem_h;
+
+#if M2S_CGM_OCL_SIM
+{
 	oclHandles.pinned_mem_out = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE|CL_MEM_ALLOC_HOST_PTR, size, NULL, &oclHandles.cl_status, CL_TRUE);
+}
+#else
+{
+	oclHandles.pinned_mem_out = clCreateBuffer(oclHandles.context, CL_MEM_READ_WRITE|CL_MEM_ALLOC_HOST_PTR, size, NULL, &oclHandles.cl_status);
+}
+#endif
+
 #ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 	  oclHandles.error_str = "excpetion in _clMallocHost -> clCreateBuffer";
@@ -1167,6 +1191,11 @@ void _clInvokeKernel(int kernel_id, int work_items, int work_group_size) throw(s
 	  work_items = work_items + (work_group_size-(work_items%work_group_size));
   	size_t local_work_size[] = {work_group_size, 1};
 	size_t global_work_size[] = {work_items, 1};
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
 	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, global_work_size, local_work_size, 0 , 0, &(e[0]));
 
 	#ifdef ERRMSG
@@ -1224,7 +1253,12 @@ void _clInvokeKernel(int kernel_id, int work_items, int work_group_size) throw(s
 	}
 	#endif
 
-	printf("before clwaitforevents\n");
+	//printf("before clwaitforevents\n");
+	clFinish(oclHandles.queue);
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 	//_clFinish();
 	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
 	#ifdef ERRMSG
@@ -1289,6 +1323,10 @@ void _clMemset(cl_mem mem_d, short val, int number_bytes)throw(string){
   	size_t local_work_size[] = {work_group_size, 1};
 	size_t global_work_size[] = {work_items, 1};
 
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
 	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, global_work_size, local_work_size, 0 , 0, &e);
 
 #ifdef ERRMSG
@@ -1347,10 +1385,15 @@ void _clMemset(cl_mem mem_d, short val, int number_bytes)throw(string){
 #endif
 
 
-	printf("before _clFinish();\n");
+	//printf("before _clFinish();\n");
 	//_clFinish();
+	clFinish(oclHandles.queue);
 
-	printf("after _clFinish();\n");
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
+
+	//printf("after _clFinish();\n");
 
 	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
 
@@ -1409,8 +1452,12 @@ void _clInvokeKernel2D(int kernel_id, int range_x, int range_y, int group_x, int
 	cl_event e[1];
 	/*if(work_items%work_group_size != 0)	//process situations that work_items cannot be divided by work_group_size
 	  work_items = work_items + (work_group_size-(work_items%work_group_size));*/
-	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, \
-											global_work_size, local_work_size, 0 , 0, &(e[0]) );	
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
+	oclHandles.cl_status = clEnqueueNDRangeKernel(oclHandles.queue, oclHandles.kernel[kernel_id], work_dim, 0, global_work_size, local_work_size, 0 , 0, &(e[0]) );
 	#ifdef ERRMSG
 	if(oclHandles.cl_status != CL_SUCCESS){
 		oclHandles.error_str = "excpetion in _clInvokeKernel() -> ";
@@ -1466,6 +1513,11 @@ void _clInvokeKernel2D(int kernel_id, int range_x, int range_y, int group_x, int
 	#endif
 		
 	//oclHandles.cl_status = clWaitForEvents(1, &e[0]);
+	clFinish(oclHandles.queue);
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 
 #ifdef ERRMSG
     if (oclHandles.cl_status!= CL_SUCCESS){

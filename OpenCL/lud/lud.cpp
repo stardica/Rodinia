@@ -28,9 +28,11 @@
 #include <string>
 #include <unistd.h>
 
-#include "rdtsc.h"
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
 
-unsigned long long p_start, p_end;
+unsigned long long p_start, p_end, p_time, k_start, k_end, k_time;
 
 #ifdef RD_WG_SIZE_0_0
 #define BLOCK_SIZE RD_WG_SIZE_0_0
@@ -73,8 +75,36 @@ cl_program CreateProgramFromBinary(cl_context context, cl_device_id device, cons
 
 #include "paths.h"
 
+#if M2S_CGM_OCL_SIM == 0
+	//performance monitor
+	PCM * m;
+
+	CoreCounterState before_sstate, after_sstate;
+
+	void intelPCM_init(){
+
+		m = PCM::getInstance();
+
+		m->resetPMU();
+
+		PCM::ErrorCode returnResult = m->program();
+
+		if (returnResult != PCM::Success)
+		{
+			std::cerr << "Intel's PCM couldn't start" << std::endl;
+			std::cerr << "Error code: " << returnResult << std::endl;
+			exit(1);
+		}
+
+		return;
+	}
+#endif
 
 int main (int argc, char *argv[]){
+
+#if M2S_CGM_OCL_SIM == 0
+	intelPCM_init();
+#endif
 
 	printf("WG size of kernel = %d X %d\n", BLOCK_SIZE, BLOCK_SIZE);
 	int matrix_dim = 32; /* default matrix_dim */
@@ -239,31 +269,29 @@ int main (int argc, char *argv[]){
 #endif
 
 
-	if(err != CL_SUCCESS)
-	{
-		printf("ERROR: clCreateBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
-		return -1;
-	}
+	if(err != CL_SUCCESS){printf("ERROR: clCreateBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);return -1;}
 
 	/* beginning of timing point */
 	stopwatch_start(&sw);
 
-	p_start = rdtsc();
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
+
 	syscall(BEGIN_PARALLEL_SECTION);
 
 	err = clEnqueueWriteBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
-
-	if(err != CL_SUCCESS)
-	{
-		printf("ERROR: clEnqueueWriteBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
-		return -1;
-	}
+	if(err != CL_SUCCESS){printf("ERROR: clEnqueueWriteBuffer d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);return -1;}
 
 	int i=0;
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_start = RDTSC();
+	#endif
+
 	for (i=0; i < matrix_dim-BLOCK_SIZE; i += BLOCK_SIZE) 
 	{
-
-		//printf("In for loop\n");
+		//printf("In for loop number %d\n", i);
 		clSetKernelArg(diagnal, 0, sizeof(void *), (void*) &d_m);
 		clSetKernelArg(diagnal, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
 		clSetKernelArg(diagnal, 2, sizeof(cl_int), (void*) &matrix_dim);
@@ -272,27 +300,25 @@ int main (int argc, char *argv[]){
 		size_t global_work1[3]  = {BLOCK_SIZE, 1, 1};
 		size_t local_work1[3]  = {BLOCK_SIZE, 1, 1};
 	   
+	//	#if M2S_CGM_OCL_SIM == 0
+		//	k_start = RDTSC();
+		//#endif
 		err = clEnqueueNDRangeKernel(cmd_queue, diagnal, 2, NULL, global_work1, local_work1, 0, 0, 0);
-		if(err != CL_SUCCESS)
-		{
-			printf("ERROR: diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);
-			return -1;
-		}
+		if(err != CL_SUCCESS){printf("ERROR: diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);return -1;}
 		
+		//#if M2S_CGM_OCL_SIM == 0
+		//	k_time += (RDTSC() - k_start);
+	//	#endif
 
 		//star added this
-		err = clEnqueueReadBuffer(cmd_queue, d_star_temp, 1, 0, matrix_dim*matrix_dim*sizeof(float), star_temp, 0, 0, 0);
-		if(err != CL_SUCCESS)
-		{
-			printf("ERROR: clEnqueueReadBuffer()=>%d failed\n", err);
-			return -1;
-		}
+		//clFinish(cmd_queue);
 
-		//printf("\n");	
-		//print_matrix(star_temp, matrix_dim);
-		
-		//printf("ND Range 1.\n");
-		//fflush(stdout);
+		//err = clEnqueueReadBuffer(cmd_queue, d_star_temp, 1, 0, matrix_dim*matrix_dim*sizeof(float), star_temp, 0, 0, 0);
+		//if(err != CL_SUCCESS)
+		//{
+		//	printf("ERROR: clEnqueueReadBuffer()=>%d failed\n", err);
+		//	return -1;
+		//}
 
 		clSetKernelArg(perimeter, 0, sizeof(void *), (void*) &d_m);
 		clSetKernelArg(perimeter, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
@@ -303,16 +329,20 @@ int main (int argc, char *argv[]){
 	  
 		size_t global_work2[3] = {BLOCK_SIZE * 2 * ((matrix_dim-i)/BLOCK_SIZE-1), 1, 1};
 		size_t local_work2[3]  = {BLOCK_SIZE * 2, 1, 1};
+
+	//	#if M2S_CGM_OCL_SIM == 0
+		//	k_start = RDTSC();
+		//#endif
 	  
 		err = clEnqueueNDRangeKernel(cmd_queue, perimeter, 2, NULL, global_work2, local_work2, 0, 0, 0);
-		if(err != CL_SUCCESS)
-		{
-			printf("ERROR:  perimeter clEnqueueNDRangeKernel()=>%d failed\n", err);
-			return -1;
-		}
+		if(err != CL_SUCCESS){printf("ERROR:  perimeter clEnqueueNDRangeKernel()=>%d failed\n", err); return -1;}
 
-		//printf("ND Range 2.\n");
-		//fflush(stdout);
+		//#if M2S_CGM_OCL_SIM == 0
+		//	k_time += (RDTSC() - k_start);
+		//#endif
+
+		//clFinish(cmd_queue);
+
 	  
 		clSetKernelArg(internal, 0, sizeof(void *), (void*) &d_m);
 		clSetKernelArg(internal, 1, sizeof(float) * BLOCK_SIZE * BLOCK_SIZE, (void*)NULL );
@@ -325,14 +355,18 @@ int main (int argc, char *argv[]){
 		size_t global_work3[3] = {BLOCK_SIZE * ((matrix_dim-i)/BLOCK_SIZE-1), BLOCK_SIZE * ((matrix_dim-i)/BLOCK_SIZE-1), 1};
 		size_t local_work3[3] = {BLOCK_SIZE, BLOCK_SIZE, 1};
 
+		//#if M2S_CGM_OCL_SIM == 0
+		//	k_start = RDTSC();
+		//#endif
+
 		err = clEnqueueNDRangeKernel(cmd_queue, internal, 2, NULL, global_work3, local_work3, 0, 0, 0);
-		if(err != CL_SUCCESS)
-		{
-			printf("ERROR:  internal clEnqueueNDRangeKernel()=>%d failed\n", err);
-			return -1;
-		}
-		//printf("ND Range 3.\n");
-		//fflush(stdout);
+		if(err != CL_SUCCESS){printf("ERROR:  internal clEnqueueNDRangeKernel()=>%d failed\n", err);return -1;}
+
+	//	#if M2S_CGM_OCL_SIM == 0
+		//	k_time += (RDTSC() - k_start);
+		//#endif
+
+		//clFinish(cmd_queue);
 
 	}
 
@@ -343,33 +377,29 @@ int main (int argc, char *argv[]){
       
 	size_t global_work1[3]  = {BLOCK_SIZE, 1, 1};
 	size_t local_work1[3]  = {BLOCK_SIZE, 1, 1};
+
+
 	err = clEnqueueNDRangeKernel(cmd_queue, diagnal, 2, NULL, global_work1, local_work1, 0, 0, 0);
-	if(err != CL_SUCCESS)
-	{
-		printf("ERROR:  diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);
-		return -1;
-	}
+	if(err != CL_SUCCESS){printf("ERROR:  diagnal clEnqueueNDRangeKernel()=>%d failed\n", err);return -1;}
 
+	clFinish(cmd_queue);
 
-	//printf("ND Range 4.\n");
-	//fflush(stdout);
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 
 	err = clEnqueueReadBuffer(cmd_queue, d_m, 1, 0, matrix_dim*matrix_dim*sizeof(float), m, 0, 0, 0);
-	if(err != CL_SUCCESS)
-	{
-		printf("ERROR: clEnqueueReadBuffer  d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);
-		return -1;
-	}
-
-	//printf("Read buffer.\n");
-	//fflush(stdout);
+	if(err != CL_SUCCESS){printf("ERROR: clEnqueueReadBuffer  d_m (size:%d) => %d\n", matrix_dim*matrix_dim, err);return -1;}
 
 	clFinish(cmd_queue);
 
 	syscall(END_PARALLEL_SECTION);
-	p_end = rdtsc();
 
-	printf("Parallel Section Cycles %llu\n", p_end - p_start);
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
+
+	printf("Parallel Section Cycles %llu Kernel Cycles %llu\n", p_time, k_time);
 
 	/* end of timing point */
 	stopwatch_stop(&sw);
