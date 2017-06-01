@@ -2,7 +2,7 @@
 
 #LUD OCL
 
-SIMULATOR = 0
+SIMULATOR = 1
 MEASURE = 1
 
 ifeq ($(SIMULATOR), 1)
