@@ -1,8 +1,8 @@
 
 #BFS
 
-SIMULATOR = 0
-MEASURE = 1
+SIMULATOR = 1
+MEASURE = 0
 
 
 ifeq ($(SIMULATOR), 1)

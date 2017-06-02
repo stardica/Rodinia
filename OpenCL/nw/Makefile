@@ -1,5 +1,5 @@
-SIMULATOR = 0
-MEASURE = 1
+SIMULATOR = 1
+MEASURE = 0
 
 #C compiler
 #CC_FLAGS = -g -O3 -Wall -m32

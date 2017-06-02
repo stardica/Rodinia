@@ -17,7 +17,10 @@
 #include <string>
 #include <sys/time.h>
 #include <unistd.h>
-#include "cpucounters.h"
+
+#if M2S_CGM_OCL_SIM == 0
+	#include "cpucounters.h"
+#endif
 
 #ifdef NV //NVIDIA
 	#include <oclUtils.h>
@@ -151,6 +154,7 @@ double gettime() {
 }
 
 //performance monitor
+#if M2S_CGM_OCL_SIM == 0
 PCM * m;
 
 CoreCounterState before_sstate, after_sstate;
@@ -172,10 +176,13 @@ void intelPCM_init(){
 
 	return;
 }
+#endif
 
 int main(int argc, char **argv){
 
-  intelPCM_init();
+  #if M2S_CGM_OCL_SIM == 0
+	intelPCM_init();
+  #endif
 
   printf("WG size of kernel = %d \n", BLOCK_SIZE);
 
@@ -338,7 +345,9 @@ int main(int argc, char **argv){
 	if(err != CL_SUCCESS) { printf("ERROR: clCreateKernel() 0 => %d\n", err); return -1; }
 	clReleaseProgram(prog);
 	
-	p_start = RDTSC();
+	#if M2S_CGM_OCL_SIM == 0
+		p_start = RDTSC();
+	#endif
 	syscall(BEGIN_PARALLEL_SECTION);
 	
 	// creat buffers
@@ -462,7 +471,9 @@ int main(int argc, char **argv){
 		local_work[0]  = BLOCK_SIZE;
 		clSetKernelArg(kernel1, 7, sizeof(cl_int), (void*) &blk);
 
-		k_start = RDTSC();
+		#if M2S_CGM_OCL_SIM == 0
+			k_start = RDTSC();
+		#endif
 		err = clEnqueueNDRangeKernel(cmd_queue, kernel1, 2, NULL, global_work, local_work, 0, 0, 0);
 
 
@@ -477,7 +488,10 @@ int main(int argc, char **argv){
 #endif
 
 	clFinish(cmd_queue);
-	k_time += (RDTSC() - k_start);
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 
 	
 	printf("Processing lower-right matrix\n");
@@ -486,14 +500,20 @@ int main(int argc, char **argv){
 		local_work[0] =  BLOCK_SIZE;
 		clSetKernelArg(kernel2, 7, sizeof(cl_int), (void*) &blk);
 
-		k_start = RDTSC();
+		#if M2S_CGM_OCL_SIM == 0
+			k_start = RDTSC();
+		#endif
+
         err = clEnqueueNDRangeKernel(cmd_queue, kernel2, 2, NULL, global_work, local_work, 0, 0, 0);
 
 		if(err != CL_SUCCESS) { printf("ERROR: 2 clEnqueueNDRangeKernel()=>%d failed\n", err); return -1; }
 	}
 
 	clFinish(cmd_queue);
-	k_time += (RDTSC() - k_start);
+
+	#if M2S_CGM_OCL_SIM == 0
+		k_time += (RDTSC() - k_start);
+	#endif
 
 	fflush(stdout);
 
@@ -503,7 +523,10 @@ int main(int argc, char **argv){
 	clFinish(cmd_queue);
 
 	syscall(END_PARALLEL_SECTION);
-	p_time = (RDTSC() - p_start);
+
+	#if M2S_CGM_OCL_SIM == 0
+		p_time = (RDTSC() - p_start);
+	#endif
 
 	printf("Parallel Section Cycles %llu Kernel cycles %llu\n", p_time, k_time);
 
