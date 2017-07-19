@@ -37,15 +37,16 @@ bpnn_layerforward_ocl(__global float *input_cuda,
 		weight_matrix[ty * WIDTH + tx]= weight_matrix[ty * WIDTH + tx] * input_node[ty];
 		barrier(CLK_LOCAL_MEM_FENCE);
    
-		for ( int i = 1 ; i <= HEIGHT ; i=i*2){
-	//for ( int i = 1 ; i <= 4 ; i++){
-      int power_two = i; 
-		//int power_two = 2 << (i - 1);
+		for ( int i = 1 ; i <= HEIGHT ; i=i*2)
+		{
+			//for ( int i = 1 ; i <= 4 ; i++){
+     		 int power_two = i; 
+			//int power_two = 2 << (i - 1);
 
-	    if( ty % power_two == 0 )
-		  weight_matrix[ty * WIDTH + tx]= weight_matrix[ty * WIDTH + tx] + weight_matrix[(ty + power_two/2)* WIDTH + tx];
+	    	if( ty % power_two == 0 )
+		  		weight_matrix[ty * WIDTH + tx]= weight_matrix[ty * WIDTH + tx] + weight_matrix[(ty + power_two/2)* WIDTH + tx];
 		  
-		barrier(CLK_LOCAL_MEM_FENCE);
+			barrier(CLK_LOCAL_MEM_FENCE);
 
     }
    
@@ -53,7 +54,8 @@ bpnn_layerforward_ocl(__global float *input_cuda,
    
 	barrier(CLK_LOCAL_MEM_FENCE);
 
-    if ( tx == 0 ) {
+    if ( tx == 0 ) 
+    {
 	  hidden_partial_sum[by * hid + ty] = weight_matrix[tx* WIDTH + ty];
     }
 
@@ -87,4 +89,5 @@ __kernel void  bpnn_adjust_weights_ocl( __global float * delta,
    }
 
 }
+
 #endif 

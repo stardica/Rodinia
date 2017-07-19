@@ -2,7 +2,7 @@
 #Backprop
 
 SIMULATOR = 1
-MEASURE = 1
+MEASURE = 0
 
 ifeq ($(SIMULATOR), 1)
 	OPENCL_DIR = /home/stardica/Dropbox/CDA7919DoctoralResearch/runtime

@@ -135,7 +135,7 @@ main( int argc, char** argv)
 {
 
 #if M2S_CGM_OCL_SIM == 0
-	intelPCM_init();
+	//intelPCM_init();
 #endif
 
 
@@ -333,20 +333,24 @@ int bpnn_train_kernel(BPNN *net, float *eo, float *eh)
 	err = clEnqueueReadBuffer(cmd_queue, hidden_partial_sum, 1, 0, num_blocks * WIDTH * sizeof(float), partial_sum, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: partial sum\n"); return -1; }	
   
-	for (int j = 1; j <= hid; j++) {
+	for (int j = 1; j <= hid; j++)
+	{
 		sum = 0.0;
-		for (int k = 0; k < num_blocks; k++) {	
-		sum += partial_sum[k * hid + j-1] ;
-    }
+
+		for (int k = 0; k < num_blocks; k++)
+		{
+			sum += partial_sum[k * hid + j-1] ;
+		}
+
 		sum += net->input_weights[0][j];
 		net-> hidden_units[j] = float(1.0 / (1.0 + exp(-sum)));
 	}
 
-	
 	bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);
 	bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);
 	bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);  
 	bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);
+
 
 	err = clEnqueueWriteBuffer(cmd_queue, hidden_delta_ocl, 1, 0, (hid + 1) * sizeof(float), net->hidden_delta, 0, 0, 0);
 	if(err != CL_SUCCESS) { printf("ERROR: clEnqueueWriteBuffer hidden_delta_ocl\n"); return -1; }

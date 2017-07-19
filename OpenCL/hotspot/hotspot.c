@@ -365,6 +365,7 @@ int main(int argc, char** argv) {
 	cl_mem MatrixTemp[2];
 	cl_mem MatrixPower = NULL;
 
+
 	#if M2S_CGM_OCL_SIM == 0
 		p_start = RDTSC();
 	#endif
@@ -418,9 +419,20 @@ int main(int argc, char** argv) {
 				    blockCols, blockRows, borderCols, borderRows, FilesavingTemp, FilesavingPower);
 	
 
+	//printf("ret %d mt0 0x%08x mt1 0x%08x swap 0x%08x ftemp 0x%08x\n",
+	//		ret, (unsigned int)&MatrixTemp[0], (unsigned int)&MatrixTemp[1], (unsigned int)swap, (unsigned int)FilesavingTemp);
+
 	// Copy final temperature data back
-	error = clEnqueueReadBuffer(command_queue, MatrixTemp[ret], 1, 0, sizeof(float) * size, FilesavingTemp, 0, 0, 0);
-	if(error != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }
+	if(ret == 0)
+	{
+		error = clEnqueueReadBuffer(command_queue, MatrixTemp[ret], 1, 0, sizeof(float) * size, FilesavingTemp, 0, 0, 0);
+		if(error != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }
+	}
+	else
+	{
+		error = clEnqueueReadBuffer(command_queue, MatrixTemp[ret], 1, 0, sizeof(float) * size, swap, 0, 0, 0);
+		if(error != CL_SUCCESS) { printf("ERROR: 1  clEnqueueReadBuffer: input_ocl\n"); return -1; }
+	}
 
 	//cl_float *MatrixOut = (cl_float *) clEnqueueMapBuffer(command_queue, MatrixTemp[ret], CL_TRUE, CL_MAP_READ, 0, sizeof(float) * size, 0, NULL, NULL, &error);
 	//if (error != CL_SUCCESS) fatal_CL(error, __LINE__);

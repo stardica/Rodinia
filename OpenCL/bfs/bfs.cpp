@@ -41,7 +41,8 @@ struct Node
 //--note: width is changed to the new_width
 //----------------------------------------------------------
 
-void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *h_graph_edges, int *h_graph_mask, int *h_updating_graph_mask, int *h_graph_visited, int *h_cost_ref){
+void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *h_graph_edges,
+		int *h_graph_mask, int *h_updating_graph_mask, int *h_graph_visited, int *h_cost_ref){
 	int stop;
 	int k = 0;
 	do{
@@ -77,7 +78,8 @@ void run_bfs_cpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *
 //----------------------------------------------------------
 //--breadth first search on GPUs
 //----------------------------------------------------------
-void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *h_graph_edges, int *h_graph_mask, int *h_updating_graph_mask, int *h_graph_visited, int *h_cost) throw(std::string){
+void run_bfs_gpu(int no_of_nodes, Node *h_graph_nodes, int edge_list_size, int *h_graph_edges,
+		int *h_graph_mask, int *h_updating_graph_mask, int *h_graph_visited, int *h_cost) throw(std::string){
 
 	//int number_elements = height*width;
 	//char h_over;
@@ -241,6 +243,7 @@ fprintf(stderr,"Usage: %s <input_file>\n", argv[0]);
 
 		return;
 	}
+
 #endif
 
 //----------------------------------------------------------

@@ -246,15 +246,19 @@ int n1, n2;
   #pragma omp parallel for shared(conn, n1, n2, l1) private(k, j) reduction(+: sum) schedule(static)
 #endif 
   /*** For each unit in second layer ***/
-  for (j = 1; j <= n2; j++) {
+  for (j = 1; j <= n2; j++)
+  {
+		/*** Compute weighted sum of its inputs ***/
+		sum = 0.0;
 
-    /*** Compute weighted sum of its inputs ***/
-    sum = 0.0;
-    for (k = 0; k <= n1; k++) {	
-      sum += conn[k][j] * l1[k]; 
-    }
-    l2[j] = squash(sum);
+		for (k = 0; k <= n1; k++)
+		{
+		  sum += conn[k][j] * l1[k];
+		}
+
+		l2[j] = squash(sum);
   }
+
 }
 
 //extern "C"
@@ -265,12 +269,15 @@ int nj;
   int j;
   float o, t, errsum;
   errsum = 0.0;
-  for (j = 1; j <= nj; j++) {
+
+  for (j = 1; j <= nj; j++)
+  {
     o = output[j];
     t = target[j];
     delta[j] = o * (1.0 - o) * (t - o);
     errsum += ABS(delta[j]);
   }
+
   *err = errsum;
 }
 
@@ -289,15 +296,20 @@ int nh, no;
   float h, sum, errsum;
 
   errsum = 0.0;
-  for (j = 1; j <= nh; j++) {
+  for (j = 1; j <= nh; j++)
+  {
     h = hidden[j];
     sum = 0.0;
-    for (k = 1; k <= no; k++) {
+
+    for (k = 1; k <= no; k++)
+    {
       sum += delta_o[k] * who[j][k];
     }
+
     delta_h[j] = h * (1.0 - h) * sum;
     errsum += ABS(delta_h[j]);
   }
+
   *err = errsum;
 }
 
@@ -318,13 +330,17 @@ float *delta, *ly, **w, **oldw;
 	  private(j, k, new_dw) \
 	  firstprivate(ndelta, nly) 
 #endif 
-  for (j = 1; j <= ndelta; j++) {
-    for (k = 0; k <= nly; k++) {
+  for (j = 1; j <= ndelta; j++)
+  {
+    for (k = 0; k <= nly; k++)
+    {
       new_dw = ((ETA * delta[j] * ly[k]) + (MOMENTUM * oldw[k][j]));
 	  w[k][j] += new_dw;
 	  oldw[k][j] = new_dw;
     }
+
   }
+
 }
 
 
@@ -378,7 +394,6 @@ float *eo, *eh;
       net->input_weights, net->input_prev_weights);
 
 }
-
 
 
 
